@@ -26,6 +26,8 @@ data_long<-data.frame(id=rep(1:length(tmp_data$id), times=2), state=c(tmp_data$v
 
 
 
+
+
 dat_2000 = education_effects(data_long, 
                              x.label = "2000 Election",
                              y.label = "2004 Election")
