@@ -6,14 +6,10 @@
 rm(list=ls())
 detach("package:dplyr")
 require(car)
-require(foreign)
-require(readstata13)
+source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/configurations.r")
 ### Set working directory 
-setwd("/Users/chrisweber/authoritarianism_book_v2/Authoritarianism_V2/Panel_Data_Files/")
+setwd("/Users/chrisweber/Dropbox/Data/Panel_Data_Files")
 ### These are user functions
-source("/Users/chrisweber/authoritarianism_book_v2/Authoritarianism_V2/config/BookFunctions.r")
-
- 
 ### 1990 ANES ####
 data.1990<-haven::read_dta("anes1990_1992.dta")
 names(data.1990)
@@ -43,15 +39,13 @@ panel.1990$pid.1990<-recode(data.1990$V900320, "0=1; 1=2; 2=3; 3=4; 4=5; 5=6; 6=
 panel.1990$pid.1991<-recode(data.1990$V912333, "0=1; 1=2; 2=3; 3=4; 4=5; 5=6; 6=7; else=NA") #Republican
 panel.1990$pid.1992<-recode(data.1990$V923634, "0=1; 1=2; 2=3; 3=4; 4=5; 5=6; 6=7; else=NA") #Republican
 
+## Check
 for (i in 1:dim(panel.1990)[2]){
   print(table(panel.1990[,i]))
 }
 
 
 ### 1992 Panel ####
-detach("package:dplyr")
-require(car)
-require(foreign)
 ### 1990 ANES ####
 data.1992<-haven::read_dta("anes1992_1997.dta")
 names(data.1992)
@@ -209,14 +203,14 @@ for (i in 1:dim(panel.2000)[2]){
 
 ###2008 ANES###
 data.2008<-haven::read_dta("anes2008_2009.dta")
-data.off<-read.spss("offwave.sav",
+data.off<-foreign::read.spss("offwave.sav",
                      use.value.labels=FALSE, to.data.frame=TRUE)
 data.2008<-merge(data.2008, data.off, by=c("caseid"))
 names(data.2008)
 panel.2008<-data.frame(caseid=data.2008$caseid)
 panel.2008$college.2008<-recode(data.2008$der05, "4:5=1; 3:3=0; else=NA")
 panel.2008$white.2008<-recode(data.2008$der04, "1=1; 3:4=0; else=NA")
-panel.2008$income.2008=recode(data.2008$der06, "1:12=0; 13:19=1;else=NA") # 68th percentile in 1999, consistent with the cumulative
+panel.2008$income.2008=recode(data.2008$der06, "1:12=0; 13:19=1;else=NA") 
 panel.2008$age.2008<-data.2008$der02
 panel.2008$sex.2008<-recode(data.2008$der01, "1=0; 2=1; else=NA")
 panel.2008$protestant.2008<-recode(data.2008$der22, "1=1;  2:5=0;  else=NA")
@@ -344,9 +338,9 @@ for (i in 1:dim(panel.2012)[2]){
 }
 
 ##### Internet Recontact Survey ######
-anes<-read.dta("data/anes_timeseries_2012_Stata12.dta",
+anes<-foreign::read.dta("anes2012.dta",
                convert.factors=FALSE)
-anes.2012a<-read.dta("data/anes_panel_2013_inetrecontact.dta",
+anes.2012a<-foreign::read.dta("anes2013.dta",
                      convert.factors=FALSE)
 anes<-merge(anes, anes.2012a, by=c("caseid"), all.x=T)  ### This tacks on the 2012 Internet Recontact
 
@@ -398,17 +392,7 @@ for (i in 1:dim(panel.2015)[2]){
   print(table(panel.2015[,i]))
 }
 ###Save data
-#save(data.anes, file= "/home/acag/Dropbox/Project Folder/projects/Stanley_Authoritarianism/data/auth.data.Rdata")
-#write.csv(data.anes, file= "/home/acag/Dropbox/Project Folder/projects/Stanley_Authoritarianism/data/auth.data.csv")
-
-#save(data.anes, file= "/users/chrisweber/Google Drive/Project Folder/projects/Stanley_Authoritarianism/data/auth.data.Rdata")
-#write.csv(data.anes, file= "/users/chrisweber/Dropbox/Project Folder/projects/Stanley_Authoritarianism/data/auth.data.csv")
-
-#For the ANES 2016 participants in this study, data can be merged from the ANES 2016 Time Series Study using the 2016 case ID variable, V160001_orig, 
-#to join the datasets.
-library(foreign)
-setwd("/Users/chrisweber/authoritarianism_book_v2")
-data.2016<-read.dta("data/anes_timeseries_2016_Stata12.dta", convert.factors=FALSE)
+data.2016<-foreign::read.dta("anes2016.dta", convert.factors=FALSE)
 case_id = data.2016$V160001_orig
 
 
@@ -508,7 +492,7 @@ dat_2016 = data.frame(auth.1.2016, auth.2.2016, auth.3.2016, auth.4.2016,
 
 
 ### 2020 Recodes
-data.2020 = read.dta13("/Users/chrisweber/authoritarianism_book_v2/data/t2020anes.dta")
+data.2020 = read.dta13("anes2020.dta")
 data = data.2020
 ## demographics, 2020.
 data = subset(data, V200003 == 2) # Subset on type -- panel only
@@ -594,24 +578,20 @@ dat_2020 =  data.frame(auth.1.2020, auth.2.2020, auth.3.2020, auth.4.2020,
 
 
 
-panel.1620 = merge(dat_2016, dat_2020, by = "case_id", all.x = T)
+panel.1620 = merge(dat_2016, dat_2020, by = "case_id")
 
 
-d1<-panel.1990[ ,order(names(panel.1990))]
-d2<-panel.2000[ ,order(names(panel.2000))]
-d3<-panel.2008[ ,order(names(panel.2008))]
-d4<-panel.2012[ ,order(names(panel.2012))]
-d5<-panel.1992[ ,order(names(panel.1992))]
-d6<-panel.2015[ ,order(names(panel.2015))]
-d7<-panel.1620[ ,order(names(panel.1620))]
+#d1<-panel.1990[ ,order(names(panel.1990))]
+panel_data_2000<-panel.2000[ ,order(names(panel.2000))]
+#d3<-panel.2008[ ,order(names(panel.2008))]
+panel_data_2012<-panel.2012[ ,order(names(panel.2012))]
+#d5<-panel.1992[ ,order(names(panel.1992))]
+#d6<-panel.2015[ ,order(names(panel.2015))]
+panel_data_2016<-panel.1620[ ,order(names(panel.1620))]
 
 
-save(d1, file="data/panel1990.RData")
-save(d2, file="data/panel2000.RData")
-save(d3, file="data/panel2008.RData")
-save(d4, file="data/panel2012.RData")
-save(d5, file="data/panel1992.RData")
-save(d6, file="data/panel2014.RData")
-save(d7, file="data/panel2020.RData")
+save(panel_data_2000, file="/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data/panel_data_2000.rda")
+save(panel_data_2012, file="/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data/panel_data_2012.rda")
+save(panel_data_2016, file="/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data/panel_data_2016.rda")
 
 
