@@ -1,17 +1,22 @@
 ### Dependencies and other stuff to avoid clutter:
-source('/Users/chrisweber/open_projects/panel_models/config.r')
-
+source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/configurations.r")
+setwd("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/Chapters/Chapter8/")
+base = "/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/Chapters/Chapter8/"
 ##### Data Recodes #####
-load("data/panel2012.RData")
-load("data/panel2000.RData")
-load("data/panel2012.RData")
-load("data/panel2020.RData")
+load("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data/panel_data_2000.rda")
+load("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data/panel_data_2012.rda")
+load("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data/panel_data_2016.rda")
+
+
 ##############################################################################
 ##############################################################################
 ##########  2000  - 2004 #####################
 ##############################################################################
 ##############################################################################
 ##############################################################################
+
+d2 = panel_data_2000
+
 
 d2<-subset(d2, white.2000==1)
 names(d2)
