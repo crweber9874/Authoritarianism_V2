@@ -1,4 +1,3 @@
-
 softmax <- function(par){
   n.par <- length(par)
   par1 <- sort(par, decreasing = TRUE)
@@ -33,11 +32,11 @@ main_by_authoritarianism = function(mod_formula = MOD1, data = tmp_data, ....){
                         data = data)
       models <- rbind(0, coef(tmp) )
       ## Generate linear predictions ###
-      low_auth =  x.var %>%  mutate(latent =0) 
+      low_auth =  x.var %>%  mutate(authoritarianism =0) 
       low_auth = data.frame(1, low_auth)
-      high_auth =  x.var %>% mutate(latent =1) 
+      high_auth =  x.var %>% mutate(authoritarianism =1) 
       high_auth = data.frame(1, high_auth)
-      # Construct the transition matrix for the ith value of the IV....
+      # Construct the transitarion matrix for the ith value of the IV....
       linear_effect1 <- c()
       linear_effect2 <- c()
       for(i in 1:nrow(models)){
@@ -49,49 +48,6 @@ main_by_authoritarianism = function(mod_formula = MOD1, data = tmp_data, ....){
         return(list(low_auth = out1, high_auth = out2))
 }
 
-################################################################################################################
-####################### Transition Estimates                                             #######################
-################################################################################################################
-
-transition_by_authoritarianism_boot = function(data = data, indices, 
-                                               mod_formula, authoritarianism = 0){
-                                              .df = data[indices, ]
-                                                y.var <- .df[,  c(1:2)]
-                                                x.var <- .df[,  c(3:ncol(.df))]
-                                              models = list()
-                                              for(i in 1:length(unique(.df$x1))){
-                                                tmp = multinom(mod_formula, 
-                                                              data = subset(.df, x1 ==i))  
-                                                models[[i]] <- rbind(rep(0, times = (ncol(x.var) + 1)), coef(tmp) )
-                                              }
-                                              ## Generate linear predictions ###
-                                              low_auth =  x.var %>%  mutate(authoritarianism =0) 
-                                              low_auth = data.frame(int = 1, low_auth)
-                                              high_auth =  x.var %>% mutate(authoritarianism =1) 
-                                              high_auth = data.frame(int = 1, high_auth)
-                                              # Construct the trhansition matrix for the ith value of the IV....
-                                              linear_effect1 <- c()
-                                              linear_effect2 <- c()
-                                              for(k in 1:length(models)){
-                                                for(i in 1:nrow(models[[k]])){
-                                                  linear_effect1 <- rbind(linear_effect1,  models[[k]][i,] %*% t(low_auth) %>%  mean())
-                                                  linear_effect2 <- rbind(linear_effect2,  models[[k]][i,] %*% t(high_auth) %>% mean())
-                                                }
-                                              }
-
-
-                                              linear_effect1 = linear_effect1 %>% matrix(ncol = 5)
-                                              linear_effect2 = linear_effect2 %>% matrix(ncol = 5) 
-                                              out1 <- matrix(NA, nrow = nrow(linear_effect1), ncol = 5)
-                                              out2 <- matrix(NA, nrow = nrow(linear_effect1), ncol = 5)
-                                              for(i in 1:nrow(out1)){  
-                                                out1[i,] <- softmax(linear_effect1[,i])
-                                                out2[i,] <- softmax(linear_effect2[,i])
-                                              }
-                                              me = out2 - out1
-                                              if(authoritarianism ==0) return(t(out1))
-                                              if(authoritarianism ==1) return(t(out2))
-}
 # Wrapper to generate effects, need to just pass the ncessary plot parms
 # Returns marginal distributions for each variable and the transition plot
 draw_transition_effects = function(tran = low, 
@@ -123,7 +79,7 @@ draw_transition_effects = function(tran = low,
                         mplot = ggplot(mapping = aes(x=x, y=y)) + 
                           geom_bar(data = tempdat1, stat="identity", width = 0.8, fill = "#746c6c", alpha = 0.4) +
                           coord_flip() + 
-                          scale_x_discrete("", limits = factor(c(1:5))) + 
+                          scale_x_discrete("", limits = factor(c(1:3))) + 
                           scale_fill_grey() +
                           theme(panel.border = element_blank()) + 
                           theme(panel.background = element_blank()) + 
@@ -137,7 +93,7 @@ draw_transition_effects = function(tran = low,
                         mplot = ggplot(mapping = aes(x=x, y=y)) + 
                           geom_bar(data = tempdat1, stat="identity", width = 0.8, fill = "#746c6c", alpha = 0.4) +
                           coord_flip() + 
-                          scale_x_discrete("", limits = factor(c(1:5))) + 
+                          scale_x_discrete("", limits = factor(c(1:3))) + 
                           scale_fill_grey() +
                           theme(panel.border = element_blank()) + 
                           theme(panel.background = element_blank()) + 
@@ -156,25 +112,23 @@ draw_transition_effects = function(tran = low,
             plot_dat$lab =   as.character(round(plot_dat$score, 3))
             #plot_dat$mean * plot_dat$x1 * plot_dat$x2 
             if(vote == 0){
-            plot_dat$colour = rep(c("#3355FF", "#33C7FF", "#9F33FF", "#EC747D", "#D0000F"), 
-                              each = nrow(plot_dat)/5)
+            plot_dat$colour = rep(c("#3355FF", "#9F33FF",  "#D0000F"), 
+                              each = nrow(plot_dat)/3)
             }
             else{
             plot_dat$colour = rep(c("#3355FF", "#D0000F"), 
                               each = nrow(plot_dat)/2)
             }
 if(vote == 0){
-   label.x =c("1" = "Democrat", "2" = "Lean Democrat", 
-                               "3" = "Independent",  
-                               "4" = "Lean Republican", "5" = "Republican") 
-    label.y =c("1" = "Dem", "2" = "Lean Dem", 
-                               "3" = "Ind",  
-                                "4" = "Lean Rep", "5" = "Rep")
+   label.x =c("1" = "Democrat", "2" = "Independent", 
+                               "3" = "Republican") 
+    label.y =c("1" = "Dem", "2" = "Independent", 
+                               "3" = "Republican")
 }
 
 if(vote == 1){
-   label.x =c("1" = "Vote Democrat", "2" = "Vote Republican") 
-   label.y =c("1" = "Democrat", "2" = "Republican")
+   label.x =c("1" = "Democrat", "2" = "Republican") 
+    label.y =c("1" = "Dem", "2" = "Rep")
 }
 
 
@@ -194,14 +148,7 @@ if(vote == 1){
 
     return(list (a, mplot))
 }
-pid.r<-function(x){
-  return(car::recode(x, "1:2=1; 3=2; 4=2; 5=2; 6:7=3"))
-}
 
-recode.auth <- function(x){
-   return(car::recode(x, "1:2=1; 3=2"))
-   
-}
 
 
 

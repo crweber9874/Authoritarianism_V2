@@ -4,13 +4,14 @@
 ## Add vote in house elections, where possible
 ####-------------------------------------------------------------------------------------####
 rm(list=ls())
-detach("package:dplyr")
-require(car)
 source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/configurations.r")
 ### Set working directory 
 setwd("/Users/chrisweber/Dropbox/Data/Panel_Data_Files")
 ### These are user functions
 ### 1990 ANES ####
+detach("package:dplyr")
+require(car)
+
 data.1990<-haven::read_dta("anes1990_1992.dta")
 names(data.1990)
 panel.1990<-data.frame(id=data.1990$V900004)
@@ -311,17 +312,6 @@ panel.2012$health.2016<-recode(data.2012$univhealthcov_2016, "1=1; 2=2; else=NA"
 panel.2012$health.2016<-recode(data.2012$univhealthcov_2020Nov, "1=1; 2=2; else=NA")
 
 
-# panel.2012$tax.2012<-recode(data.2012$taxwealth_baseline, "3=2; 2=3; else=NA")
-# panel.2012$tax.2016<-recode(data.2012$taxdoug_2016, "3=2; 2=3; else=NA")
-# panel.2012$tax.2017<-recode(data.2012$taxdoug_2017, "3=2; 2=3; else=NA")
-
-
-# panel.2012$healthreform.2012<-recode(data.2012$healthreformbill_baseline, "1=1; 2=2; 3=3; else=NA")
-# panel.2012$healthreform.2016<-recode(data.2012$healthreformbill_2016, "1=1; 2=2; 3=3; else=NA")
-# panel.2012$healthreform.2017<-recode(data.2012$healthreformbill_2017, "1=1; 2=2; 3=3; else=NA")
-
-### House Vote
-# panel.2012$voteH.2012<-recode(data.2012$post_house12_2012, "1=1; 2=2; else=NA") # Republican
 #
 ## Party Identification
 panel.2012$pid.2012a<-recode(data.2012$pid7_2011, "1=1; 2=2; 3=3; 4=4; 5=5; 6=6; 7=7; else=NA")
@@ -527,7 +517,6 @@ income.2020<-recode(data$V202468x, "11:22=1; 1:10=0; else=NA")
 pid.2020<-recode(data$V201231x, "1=1; 2=2; 3=3; 4=4; 5=5; 6=6; 7=7; else=NA")
 female.2020   <-recode(data$V201600, "1=0; 2=1; else=NA") #
 white.2020    <-ifelse(data$V201549x==1, 1, ifelse(data$V201549x!=1 & data$V201549x>0, 0, NA))
-nonwhite.2020 <-abs(white-1)
 black.2020    <-ifelse(data$V201549x==2, 1, ifelse(data$V201549x!=2 & data$V201549x>0, 0, NA))
 hispanic.2020      <-ifelse(data$V201549x==3, 1, ifelse(data$V201549x!=3 & data$V201549x>0, 0, NA))
 asian.2020         <-ifelse(data$V201549x==4, 1, ifelse(data$V201549x!=4 & data$V201549x>0, 0, NA))
