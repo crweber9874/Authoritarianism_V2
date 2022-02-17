@@ -1,11 +1,22 @@
-require(readstata13)
-library(foreign)
-library(car)
 ###  Data Description ##
 # Load cumulative data 
 #### The Cumulative Data ####
-setwd("/Users/chrisweber/authoritarianism_book_v2")
-anes <- read.dta13("data/anes_timeseries_cdf_stata12.dta",
+rm(list=ls())
+require(readstata13)
+library(foreign)
+detach("package:dplyr")
+library(car)
+
+source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/configurations.r")
+### Set working directory 
+setwd("/Users/chrisweber/Dropbox/Data/Panel_Data_Files")
+### These are user functions
+### 1990 ANES ####
+data_location = "/Users/chrisweber/Dropbox/Data/cross_sectional"
+setwd("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data")
+detach("package:dplyr")
+
+anes <- read.dta13(paste0(data_location, "/anes_timeseries_cdf_stata12.dta"),
                convert.factors=FALSE)
 CD   <- as.numeric(recode(anes$VCF0900, "0=NA; 99=NA")) ##00 no district, 99 DC
 STATE<- as.numeric(recode(anes$VCF0901a, "00=NA; 99=NA")) ##00 Missing, 99 NA
@@ -346,10 +357,7 @@ data.cumulative.anes<-data.frame(female, college,
                           weights.all, weights.ftf, weights.web,
                           anger.dem, fear.dem, hope.dem, proud.dem, 
                           anger.rep, fear.rep, hope.rep, proud.rep,
-                          feel.black, feel.latino, feel.asian, aid.blacks, reps, dems
-                          
-                          
-)
+                          feel.black, feel.latino, feel.asian, aid.blacks, reps, dem)
 
 require(foreign)                          
 ####-------------------------------------------------------------------------------------####
@@ -361,61 +369,61 @@ require(foreign)
 
 
 #### The Cross sections
-anes.1990<-read.dta("data/NES1990.dta", convert.factors=FALSE)
-anes.1992<-read.dta("data/NES1992.dta", convert.factors=FALSE)
-anes.1994<-read.dta("data/NES1994.dta", convert.factors=FALSE)
-anes.2000<-read.dta("data/anes2000TS.dta", convert.factors=FALSE)
-anes.2004<-read.dta("data/anes2004TS.dta", convert.factors=FALSE)
-anes.2008<-read.dta("data/anes_timeseries_2008_stata12.dta", convert.factors=FALSE)
-anes.2012<-read.dta("data/anes_timeseries_2012_Stata12.dta", convert.factors=FALSE)
+anes.1990<-read.dta(paste0(data_location, "/NES1990.dta"), convert.factors=FALSE)
+anes.1992<-read.dta(paste0(data_location,"/NES1992.dta"), convert.factors=FALSE)
+anes.1994<-read.dta(paste0(data_location,"/NES1994.dta"), convert.factors=FALSE)
+anes.2000<-read.dta(paste0(data_location,"/anes2000TS.dta"), convert.factors=FALSE)
+anes.2004<-read.dta(paste0(data_location,"/anes2004TS.dta"), convert.factors=FALSE)
+anes.2008<-read.dta(paste0(data_location,"/anes_timeseries_2008_stata12.dta"), convert.factors=FALSE)
+anes.2012<-read.dta(paste0(data_location,"/anes_timeseries_2012_Stata12.dta"), convert.factors=FALSE)
 ###1990##
 id.1990<-anes.1990$V900004 #Identifier
 year.1990<-rep(1990, times=(length(id.1990)))
-auth1.1990<-recode(anes.1990$V900330, "1=1;2=3; 3=2; else=NA") #Obey authority
+auth1.1990<-recode(anes.1990$V900330, "1=1; 2=2; 3=1; else=NA") #Obey authority
 
 ###1992###
 id.1992<-anes.1992$V923004 #Identifier
 year.1992<-rep(1992, times=(length(id.1992)))
-auth1.1992<-recode(anes.1992$V926020, "1=3;3=2; 5=1; else=NA") #Obey authority
-auth2.1992<-recode(anes.1992$V926019, "1=1;3=2; 5=3; else=NA") #Respect for Elders
-auth3.1992<-recode(anes.1992$V926021, "1=1;3=2; 5=3; else=NA") #Good Manners
-auth4.1992<-recode(anes.1992$V926022, "1=1;3=2; 5=3; else=NA") #Well behaved
+auth1.1992<-recode(anes.1992$V926020, "1=2; 3=1; 5=1; else=NA") #Obey authority
+auth2.1992<-recode(anes.1992$V926019, "1=1; 3=1; 5=2; else=NA") #Respect for Elders
+auth3.1992<-recode(anes.1992$V926021, "1=1; 3=1; 5=2; else=NA") #Good Manners
+auth4.1992<-recode(anes.1992$V926022, "1=1; 3=1; 5=2; else=NA") #Well behaved
 
 ###1994###
 id.1994<-anes.1994$V940001 #Identifier
 year.1994<-rep(1994, times=(length(id.1994)))
-auth1.1994<-recode(anes.1994$V926020, "1=3;3=2; 5=1; else=NA") #Obey Authority
-auth2.1994<-recode(anes.1994$V926019, "1=1;3=2; 5=3; else=NA") #Respect for elders
-auth3.1994<-recode(anes.1994$V926021, "1=1;3=2; 5=3; else=NA") #Good manners
-auth4.1994<-recode(anes.1994$V926022, "1=1;3=2; 5=3; else=NA") #Well behaved
+auth1.1994<-recode(anes.1994$V926020, "1=2; 3=1; 5=1; else=NA") #Obey Authority
+auth2.1994<-recode(anes.1994$V926019, "1=1;3=1; 5=2; else=NA") #Respect for elders
+auth3.1994<-recode(anes.1994$V926021, "1=1;3=1; 5=2; else=NA") #Good manners
+auth4.1994<-recode(anes.1994$V926022, "1=1;3=1; 5=2; else=NA") #Well behaved
 ###2000###
 id.2000<-anes.2000$V000001 #Identifier
 year.2000<-rep(2000, times=(length(id.2000)))
-auth1.2000<-recode(anes.2000$V001587, "1=3;3=2; 5=1; else=NA") #Obey Authority
-auth2.2000<-recode(anes.2000$V001586, "1=1;3=2; 5=3; else=NA") #Respect for elders
-auth3.2000<-recode(anes.2000$V001588, "1=1;3=2; 5=3; else=NA") #Good manners
-auth4.2000<-recode(anes.2000$V001589, "1=1;3=2; 5=3; else=NA") #Well behaved
+auth1.2000<-recode(anes.2000$V001587, "1=2;3=1; 5=1; else=NA") #Obey Authority
+auth2.2000<-recode(anes.2000$V001586, "1=1;3=1; 5=2; else=NA") #Respect for elders
+auth3.2000<-recode(anes.2000$V001588, "1=1;3=1; 5=2; else=NA") #Good manners
+auth4.2000<-recode(anes.2000$V001589, "1=1;3=1; 5=2; else=NA") #Well behaved
 ###2004###
 id.2004<-anes.2004$V040001 #Identifier
 year.2004<-rep(2004, times=(length(id.2004)))
-auth1.2004<-recode(anes.2004$V045210, "1=3;3=2; 5=1; else=NA") #Obey Authority
-auth2.2004<-recode(anes.2004$V045208, "1=1;3=2; 5=3; else=NA") #Respect for elders
-auth3.2004<-recode(anes.2004$V045209, "1=1;3=2; 5=3; else=NA") #Good manners
-auth4.2004<-recode(anes.2004$V045211, "1=1;3=2; 5=3; else=NA") #Well behaved
+auth1.2004<-recode(anes.2004$V045210, "1=2;3=1; 5=1; else=NA") #Obey Authority
+auth2.2004<-recode(anes.2004$V045208, "1=1;3=1; 5=2; else=NA") #Respect for elders
+auth3.2004<-recode(anes.2004$V045209, "1=1;3=1; 5=2; else=NA") #Good manners
+auth4.2004<-recode(anes.2004$V045211, "1=1;3=1; 5=2; else=NA") #Well behaved
 ###2008###
 id.2008<-anes.2008$V080001 #Identifier
 year.2008<-rep(2008, times=(length(id.2008)))
-auth1.2008<-recode(anes.2008$V085160, "1=3;3=2; 5=1; else=NA") #Obey Authority
-auth2.2008<-recode(anes.2008$V085158, "1=1;3=2; 5=3; else=NA") #Respect for elders
-auth3.2008<-recode(anes.2008$V085159, "1=1;3=2; 5=3; else=NA") #Good manners
-auth4.2008<-recode(anes.2008$V085161, "1=1;3=2; 5=3; else=NA") #Well behaved
-###2008###
+auth1.2008<-recode(anes.2008$V085160, "1=2;3=1; 5=1; else=NA") #Obey Authority
+auth2.2008<-recode(anes.2008$V085158, "1=1;3=1; 5=2; else=NA") #Respect for elders
+auth3.2008<-recode(anes.2008$V085159, "1=1;3=1; 5=2; else=NA") #Good manners
+auth4.2008<-recode(anes.2008$V085161, "1=1;3=1; 5=2; else=NA") #Well behaved
+###212###
 id.2012<-anes.2012$caseid #Identifier
 year.2012<-rep(2012, times=(length(id.2012)))
-auth1.2012<-recode(anes.2012$auth_obed, "1=3; 2=1; 3=2; else=NA") #Obey Authority
-auth2.2012<-recode(anes.2012$auth_ind, "1=1;  2=3; 3=2; else=NA") #Respect for elders
-auth3.2012<-recode(anes.2012$auth_cur, "1=1;   2=3; 3=2; else=NA") #Good manners
-auth4.2012<-recode(anes.2012$auth_consid, "1=1; 2=3; 3=2; else=NA") #Well behaved
+auth1.2012<-recode(anes.2012$auth_obed, "1=2; 2=1; 3=1; else=NA") #Obey Authority
+auth2.2012<-recode(anes.2012$auth_ind, "1=1;  2=2; 3=1; else=NA") #Respect for elders
+auth3.2012<-recode(anes.2012$auth_cur, "1=1;   2=2; 3=1; else=NA") #Good manners
+auth4.2012<-recode(anes.2012$auth_consid, "1=1; 2=2; 3=1; else=NA") #Well behaved
 
 authoritarianism.data<-data.frame(cbind(
   c(id.1990, id.1992, id.1994, id.2000, id.2004, id.2008, id.2012),
@@ -459,7 +467,8 @@ auth.data$term[auth.data$year==2012]<- 112
 ### This is the 2016 data, which I attach to the main data file ###
 #### The 2016 data
 #require(foreign)
-data<-read.dta("data/anes_timeseries_2016_Stata12.dta", convert.factors=FALSE)
+data<-read.dta(paste0(data_location,"/anes_timeseries_2016_Stata12.dta"), convert.factors=FALSE)
+
 rid<-data$V160001
 
 weights.all<-data$V160102
@@ -626,11 +635,11 @@ vote.primary<-recode(data$V161021a, "1='AHC'; 2='BS'; 4='DT'; 5='TC';
 ###voted Obama
 vote.obama<-recode(data$V161006, "1=1; 2=0; else=NA") ### Two party vote
 ## Authoritarianism -- Numbering matches the code above
-auth.1<-recode(data$V162241, "1=3; 2=1; 3=2; else=NA") ### Respect
-auth.2<-recode(data$V162239, "1=1; 2=3; 3=2; else=NA") ### Child repsect versus indepdnence
-auth.3<-recode(data$V162240, "1=1; 2=3; 3=2; else=NA") ### Manners
-auth.4<-recode(data$V162242, "1=1; 2=3; 3=2; else=NA") ### Behaved
-alpha(cbind(auth.1, auth.2, auth.3, auth.4))
+auth.1<-recode(data$V162241, "1=2; 2=1; 3=1; else=NA") ### Respect
+auth.2<-recode(data$V162239, "1=1; 2=2; 3=1; else=NA") ### Child repsect versus indepdnence
+auth.3<-recode(data$V162240, "1=1; 2=2; 3=1; else=NA") ### Manners
+auth.4<-recode(data$V162242, "1=1; 2=2; 3=1; else=NA") ### Behaved
+psych::alpha(cbind(auth.1, auth.2, auth.3, auth.4))
 authoritarianism<-(rowMeans(cbind(auth.1, auth.2, auth.3, auth.4), na.rm=T)-1)/2
 ###hostile sexism.
 hostile1<-recode(data$V161507, "1=5; 2=4 ; 3=3 ;4=2; 5=1;  else=NA") ### Inerpret everything as sexist
@@ -775,7 +784,7 @@ egal1<-recode(data$V162243, "1=1; 2=2; 3=3; 4=4; 5=5; else=NA")  ## Unequal oppr
 egal2<-recode(data$V162244, "1=5; 2=4; 3=3; 4=2; 5=1; else=NA")  ## Worry less about eqwuality
 egal3<-recode(data$V162245, "1=5; 2=4; 3=3; 4=2; 5=1; else=NA")  ## Tradition
 egal4<-recode(data$V162246, "1=1; 2=2; 3=3; 4=4; 5=5; else=NA")  ## Fewer propnblems if fair treat
-alpha(cbind(egal1, egal2, egal3, egal4))
+psych::alpha(cbind(egal1, egal2, egal3, egal4))
 anti.egalitarianism<-(rowMeans(cbind(egal1, egal2, egal3, egal4), na.rm=T)-1)/4
 ### knwoeldge
 k1<-recode(data$V161513, "6=1; else=0")  ## Senate term
@@ -786,7 +795,7 @@ k5<-recode(data$V162073a, "1=1; 0=0; else=NA")  ## Speaker of house
 k6<-recode(data$V162074a, "1=1; 0=0; else=NA")  ## Angela merkel
 k7<-recode(data$V162075a, "1=1; 0=0; else=NA")  ## Putin
 k8<-recode(data$V162076a, "1=1; 0=0; else=NA")  ## CHief justice
-alpha(data.frame( k1, k2, k3, k4, k5, k6, k7, k8))
+psych::alpha(data.frame( k1, k2, k3, k4, k5, k6, k7, k8))
 #knowledge<-rowMeans(cbind(k1, k2, k3, k4, k5, k6, k7, k8), na.rm=T)
 
 ### Feeling Thermometer
@@ -912,9 +921,7 @@ data_2016 <- data
 
 ###  Data Description ##
 ## FTF is infeasible in 2016. I just use all the data. Recall we truncated the rest to be face-to-face
-setwd("/Users/chrisweber/authoritarianism_book_v2")
-data<-read.dta13("data/t2020anes.dta", convert.factors = TRUE)
-## Religion
+data<-read.dta13(paste0(data_location,"/t2020anes.dta"), convert.factors = TRUE)
 data$case_id = data$V160001_orig
 protestant<-recode(data$V201435, "1=1; 2:12=0; else=NA")
 catholic<-recode(data$V201435, "2=1; 1=0; 3:12=0; else=NA")
@@ -922,17 +929,11 @@ jewish<-recode(data$V201435, "5=1; 1:4=0; 6:12=0; else=NA")
 other<-recode(data$V201435, "11:12=1; 1:10=0; else=NA")
 church<-recode(data$V201453, "1=1; 2:5=0; else=NA") #Attend church at least once per week
 bible<-recode(data$V201434, "1=3; 2=2; 3=1; else=NA")
-#### Income #### 
 income<-rep(NA, length(bible))
-# I had a hard time locating the exact 68 percentile. I'll just use +70k, which is a reasonable approximation,
-# given the 50 and 75 percentiles here: https://dqydj.com/average-median-top-household-income-percentiles/
 income<-recode(data$V202468x, "11:22=1; 1:10=0; else=NA") 
 pid<-(recode(data$V201231x, "1=1; 2=2; 3=3; 4=4; 5=5; 6=6; 7=7; else=NA")-1)/6
-### Primary voting
 primary<-recode(data$V201020, "1=1; 2=0; else=NA")
-####Religion importance
 religious.importance<-recode(data$V201433, "1=5; 2=4; 3=3; 4=2; 5=1; else=NA")
-###Demographics
 female<-recode(data$V201600, "1=0; 2=1; else=NA") #
 white<-ifelse(data$V201549x==1, 1, ifelse(data$V201549x!=1 & data$V201549x>0, 0, NA))
 nonwhite<-abs(white-1)
@@ -1045,10 +1046,10 @@ fear.rep<- rep(NA, length(mode))
 hope.rep<- rep(NA, length(mode))  
 proud.rep<-rep(NA, length(mode))  
 ## Authoritarianism -- Numbering matches the code above
-auth.2<-recode(data$V202266, "1=1; 2=3; 3=2; else=NA") ### Child repsect versus indepdnence
-auth.3<-recode(data$V202267, "1=1; 2=3; 3=2; else=NA") ### Manners
-auth.1<-recode(data$V202268, "1=3; 2=1; 3=2; else=NA") ### Respect
-auth.4<-recode(data$V202269, "1=1; 2=3; 3=2; else=NA") ### Behaved
+auth.2<-recode(data$V202266, "1=1; 2=2; 3=1; else=NA") ### Child repsect versus indepdnence
+auth.3<-recode(data$V202267, "1=1; 2=2; 3=1; else=NA") ### Manners
+auth.1<-recode(data$V202268, "1=2; 2=1; 3=1; else=NA") ### Respect
+auth.4<-recode(data$V202269, "1=1; 2=2; 3=1; else=NA") ### Behaved
 
 
 aid.blacksD <- rep(NA, length(mode)) 
@@ -1158,9 +1159,12 @@ for(i in 1:dim(data)[2]){
 
 # Save data
 data$rid2<-seq(1:nrow(data))
+##### Measures ######
+
 save(data, file= "pooled.auth.Rdata")
 
 write.dta(data, file="pooled.ANES.dta")
+
 
 write.csv(data, file="pooled.ANES.csv")
 
