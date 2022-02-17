@@ -271,22 +271,15 @@ d7$pid3.2 <- pid.r(d7$pid.2020)
 DATA            =    d7[,c("auth.1.2016", "auth.2.2016", "auth.3.2016", "auth.4.2016",
                             "college.2016", "age.2016", "female.2016", "income.2016",
                            "catholic.2016", "jewish.2016", "pid3.1", "pid3.2", "other.2016")] %>% na.omit()
-DATA[c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016")]= 
-            DATA %>% select(c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016")) %>% apply(2, recode.auth) 
+), "auth.2.2016", "auth.3.2016", "auth.4.2016")]= 
+            DATA %>% select(c("auth.1.2016", "auth.2.2016", "auth.3.2016", "auth.4.2016")) %>% apply(2, recode.auth) 
             
-DATA$authoritarianism <- rowMeans(DATA[,c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016")], na.rm = T) %>% zero.one()
+DATA$authoritarianism <- rowMeans(DATA[,c("auth.1.2016", "auth.2.2016", "auth.3.2016", "auth.4.2016")], na.rm = T) %>% zero.one()
+DATA$authoritarianism2 <- DATA$authoritarianism^2
 
 CAT_LABELS      =  c("Democrat",  "Independent", "Republican")
 
-
-
-
-DATA[c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016")]= 
-            DATA %>% select(c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016")) %>% apply(2, recode.auth) 
-            
-DATA$authoritarianism <- rowMeans(DATA[,c("auth.1.2016", "auth.2.2016", "auth.3.2016", "auth.4.2016")], na.rm = T) %>% zero.one()
-
-tmp_data =  DATA[,names(DATA) %in% c("authoritarianism", "college.2016", "age.2016", "female.2016", "income.2016",
+tmp_data =  DATA[,names(DATA) %in% c("authoritarianism", "authoritarianism2", "college.2016", "age.2016", "female.2016", "income.2016",
                            "catholic.2016", "jewish.2016", "pid3.1", "pid3.2", "other.2016")]  
                            
                            
@@ -296,6 +289,7 @@ data_long<-data.frame(
                  id=rep(1:nrow(tmp_data), times=2),
                  state=c(tmp_data$pid3.1, tmp_data$pid3.2),
                  authoritarianism=c(tmp_data$authoritarianism, tmp_data$authoritarianism),
+                 authoritarianism2=c(tmp_data$authoritarianism2, tmp_data$authoritarianism2),
                  sex=rep(tmp_data$female.2016, times=2),
                  college=rep(tmp_data$college.2016, times=2),
                  income=rep(tmp_data$income.2016, times=2),
@@ -314,7 +308,7 @@ STARTS<-rbind(c(0, .10,.10),
 tmp_data$id = seq(1:nrow(tmp_data))
 statetable.msm(state, id, data_long)
 model<-msm(state~time, 
-     covariates=~authoritarianism+sex+college+income+age, 
+     covariates=~authoritarianism+ authoritarianism2 + sex+college+income+age, 
      subject=id, data=data_long,
      qmatrix=STARTS, obstype=1,
     method="BFGS", 
@@ -329,7 +323,7 @@ low <- pmatrix.msm(model, t=1, ci="none",
 
 #### Predictions for high levels of authoritarianism ####
 hi <- pmatrix.msm(model, t=1, ci="none", 
-        covariates=list(authoritarianism=1,
+        covariates=list(authoritarianism=1, authoritarianism2=1,
          sex = 1, college = 0, 
          income = 0, age  = mean(data_long$age, na.rm= T))) %>% c() %>% matrix(ncol = length(CAT_LABELS))
     
@@ -380,37 +374,83 @@ low_auth <- draw_transition_effects(tran = low,
     draw_figure_label("Transition Matrices, By Authoritarianism",
                       position = "top.left", size = 13, fontface = "bold")
 
-save_plot("e2012.pdf", plt, ncol = 2, base_asp = 1.68, base_height = 5, base_width = 5)
+save_plot("e2016.pdf", plt, ncol = 2, base_asp = 1.68, base_height = 5, base_width = 5)
 
 
 
+####### 2012 - 2016 VSG Replication #############
+d4$id<-c(1:dim(d4)[1])
+d4$pid3.1<-pid.r(d4$pid.2012b)
+d4$pid3.2<-pid.r(d4$pid.2016)
+d4$pid3.3<-pid.r(d4$pid.2020)
+d4 = subset(d4, white.2012 == 1)
+d4$pid3.1 <- pid.r(d4$pid.2016)
+d4$pid3.2 <- pid.r(d4$pid.2020)
+DATA            =    d4[,c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016",
+                            "college.2012", "age.2012", "sex.2012", "income.2012",
+                           "catholic.2012", "jewish.2012", "pid3.1", "pid3.2", "other.2012")] %>% na.omit()
+
+DATA[, c("auth1.2016", "auth2.2016", "auth.3.2016", "auth.4.2016")]= 
+            DATA %>% select(c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016")) %>% apply(2, recode.auth) 
+            
+DATA$authoritarianism <- rowMeans(DATA[,c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016")], na.rm = T) %>% zero.one()
+
+CAT_LABELS      =  c("Democrat",  "Independent", "Republican")
+
+tmp_data =  DATA[,names(DATA) %in% c("authoritarianism", "college.2012", "age.2012", "sex.2012", "income.2012",
+                           "catholic.2012", "jewish.2012", "pid3.1", "pid3.2", "other.2012")]  
+                           
+                           
+tmp_data$id = seq(1:nrow(tmp_data))
+
+data_long<-data.frame(id=rep(1:length(tmp_data$id), times=2), state=c(tmp_data$pid3.1, tmp_data$pid3.2),
+                 authoritarianism=rep(tmp_data$authoritarianism, times=2),
+                 sex=rep(tmp_data$sex.2012, times=2),
+                 college=rep(tmp_data$college.2012, times=2),
+                 income=rep(tmp_data$income.2012, times=2),
+                 age=zero.one(rep(tmp_data$age.2012, times=2)),
+                 jewish=rep(tmp_data$jewish.2012, times=2),
+                 catholic=rep(tmp_data$catholic.2012, times=2),
+                 other=rep(tmp_data$other.2012, times=2),
+                 time=c(rep(c(1:2), each=length(tmp_data$id) )))%>%  
+                 arrange(id, time)%>%na.omit()
+
+STARTS<-rbind(c(0, .10,.10),
+                 c(0.1,  0,  0.1),
+                 c(0.1, .10,  0))
+tmp_data$id = seq(1:nrow(tmp_data))
 statetable.msm(state, id, data_long)
-twoway3.q<-rbind(c(0,0.10, 0, 0, 0),
-                c(0.1,0, 0.10, 0, 0),
-                c(0, 0.10, 0, 0.1, 0),
-                c(0 ,0, 0.10, 0, 0.1),
-                c(0 ,0, 0, 0.1, 0)
-)
-
-model<-msm(state~time, covariates=~authoritarianism+sex+college+income+catholic+age + other, 
-           subject=id, data=data_long,
-           qmatrix=twoway3.q, obstype=1,
-           method="BFGS", 
+model<-msm(state~time, 
+     covariates=~authoritarianism+sex+college+income+age, 
+     subject=id, data=data_long,
+     qmatrix=STARTS, obstype=1,
+    method="BFGS", 
            control=list(trace=1, 
-           REPORT=1,fnscale=100, maxit=10000))
+           REPORT=1,fnscale=100, maxit=100000))
+
+
 #### Predictions for low level
-low <- pmatrix.msm(model, t=1, ci="none", covariates=list(authoritarianism=0)) %>% c() %>% matrix(ncol = length(CAT_LABELS))
+low <- pmatrix.msm(model, t=1, ci="none", 
+        covariates=list(authoritarianism=0,
+         sex = 1, college = 0, 
+         income = 0, age  = mean(data_long$age, na.rm= T))) %>% c() %>% matrix(ncol = length(CAT_LABELS))
+         
 
 #### Predictions for high levels of authoritarianism ####
-hi  <- pmatrix.msm(model, t=1, ci="none", covariates=list(authoritarianism=1)) %>% c() %>% matrix(ncol = length(CAT_LABELS))
+hi <- pmatrix.msm(model, t=1, ci="none", 
+        covariates=list(authoritarianism=1,
+         sex = 1, college = 0, 
+         income = 0, age  = mean(data_long$age, na.rm= T))) %>% c() %>% matrix(ncol = length(CAT_LABELS))
+    
 rownames(low) <- rownames(hi) <- colnames(low) <- colnames(hi) <- CAT_LABELS
-
 ### Fixed parameter values ######
-MOD1 = as.formula(pid3.1~ latent + female.2016 + college.2016 + 
-                        income.2016 + age.2016 + jewish.2016 + catholic.2016 + other.2016)
-MOD2 = as.formula(pid3.1~ latent + female.2016 + college.2016 + 
-                        income.2016 + age.2016 + jewish.2016 + catholic.2016 + other.2016)
 
+MOD1 = as.formula(pid3.1~ authoritarianism + sex.2012 + college.2012 + 
+                        income.2012 + age.2012)
+MOD2 = as.formula(pid3.1~ authoritarianism + sex.2012 + college.2012 + 
+                        income.2012 + age.2012)
+                        
+                        
 high_auth <- draw_transition_effects(tran = hi, 
                                    data = tmp_data,
                                    mod1 = MOD1,
@@ -437,6 +477,7 @@ low_auth <- draw_transition_effects(tran = low,
                                    )
 
 
+#dev.new()
   plt = ggdraw() +
     draw_plot(high_auth[[1]], 0, 0.05,   width = 0.85,   height =   0.45) +   
     draw_plot(low_auth[[1]],  0, 0.5,    width = 0.85,    height = 0.45)  +
@@ -448,64 +489,15 @@ low_auth <- draw_transition_effects(tran = low,
     draw_figure_label("Transition Matrices, By Authoritarianism",
                       position = "top.left", size = 13, fontface = "bold")
 
-save_plot("e2020_ANES.pdf", plt, ncol = 2, base_asp = 1.68, base_height = 5, base_width = 5)
+save_plot("e20162.pdf", plt, ncol = 2, base_asp = 1.68, base_height = 5, base_width = 5)
 
 
 
-####### 2012 - 2016 #############
-d4$id<-c(1:dim(d4)[1])
-d4$pid3.1<-pid.r(d4$pid.2012b)
-d4$pid3.2<-pid.r(d4$pid.2016)
-d4$pid3.3<-pid.r(d4$pid.2020)
-d4 = subset(d4, white.2012 == 1)
 
-##############################################################################
-DATA            =    d4[,c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016",
-                           "college.2012", "age.2012", "sex.2012", "income.2012",
-                           "catholic.2012", "jewish.2012", "pid3.1", "pid3.2", "pid3.3", "other.2012")] %>% na.omit()
-FORMULA         =  "latent =~ auth1.2016 + auth2.2016 + auth3.2016 + auth4.2016"
-ORDERED         =  c("auth1.2016", "auth2.2016", "auth3.2016", "auth4.2016")
-CAT_LABELS      =  c("Democrat", "Lean Democrat", "Independent", "Lean Republican",  "Republican")
-#### Append the data with the latent variable
-tmp_data = latent_model(formula = FORMULA,  
-                        ordered = ORDERED,
-                        data = DATA)  #### Return the original data frame with latent authoritarianism scores, 0 - 1 coded
 
-## Transition matrix starts ####
-twoway3.q<-rbind(c(0,0.10, 0, 0, 0),
-                 c(0.1,0, 0.10, 0, 0),
-                 c(0, 0.10, 0, 0.1, 0),
-                 c(0 ,0, 0.10, 0, 0.1),
-                 c(0 ,0, 0, 0.1, 0)
-)
 
-data_long<-data.frame(id=rep(1:length(tmp_data$id), times=2), state=c(tmp_data$pid3.1, tmp_data$pid3.2),
-                 authoritarianism=rep(tmp_data$latent, times=2),
-                 sex=rep(tmp_data$sex.2012, times=2),
-                 college=rep(tmp_data$college.2012, times=2),
-                 income=rep(tmp_data$income.2012, times=2),
-                 age=zero.one(rep(tmp_data$age.2012, times=2)),
-                 jewish=rep(tmp_data$jewish.2012, times=2),
-                 catholic=rep(tmp_data$catholic.2012, times=2),
-                 other=rep(tmp_data$other.2012, times=2),
-                 time=c(rep(c(1:2), each=length(tmp_data$id) )))%>%  
-                 arrange(id, time)%>%na.omit()
-statetable.msm(state, id, data_long)
-twoway3.q<-rbind(c(0,0.10, 0, 0, 0),
-                c(0.1,0, 0.10, 0, 0),
-                c(0, 0.10, 0, 0.1, 0),
-                c(0 ,0, 0.10, 0, 0.1),
-                c(0 ,0, 0, 0.1, 0)
-)
 
-model<-msm(state~time, covariates=~authoritarianism+sex+college+income+catholic+age + other, 
-           subject=id, data=data_long,
-           qmatrix=twoway3.q, obstype=1,
-           method="BFGS", 
-           control=list(trace=1, 
-           REPORT=1,fnscale=10, maxit=10000))
-#### Predictions for low level
-low <- pmatrix.msm(model, t=1, ci="none", covariates=list(authoritarianism=0)) %>% c() %>% matrix(ncol = length(CAT_LABELS))
+
 
 #### Predictions for high levels of authoritarianism ####
 hi  <- pmatrix.msm(model, t=1, ci="none", covariates=list(authoritarianism=1)) %>% c() %>% matrix(ncol = length(CAT_LABELS))
