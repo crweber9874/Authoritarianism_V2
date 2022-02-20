@@ -410,6 +410,8 @@ auth1.2004<-recode(anes.2004$V045210, "1=2;3=1; 5=1; else=NA") #Obey Authority
 auth2.2004<-recode(anes.2004$V045208, "1=1;3=1; 5=2; else=NA") #Respect for elders
 auth3.2004<-recode(anes.2004$V045209, "1=1;3=1; 5=2; else=NA") #Good manners
 auth4.2004<-recode(anes.2004$V045211, "1=1;3=1; 5=2; else=NA") #Well behaved
+
+
 ###2008###
 id.2008<-anes.2008$V080001 #Identifier
 year.2008<-rep(2008, times=(length(id.2008)))

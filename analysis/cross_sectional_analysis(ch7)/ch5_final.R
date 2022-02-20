@@ -1,139 +1,383 @@
-##### Chapter 5, V2:  
-
-### Authoritarianism and its Relationship to PID among Whites #####
-# Relies on pooled data.
-# Source file generates effects
-
-#tinytex::install_tinytex()
-#install.packages("ggjoy")
+##### Chapter 6
+rm(list = ls())
+###  Data Description ##
+# More transformations and data recodes.....
+source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/configurations.r")
 detach("package:dplyr")
-library(readstata13)
-library(foreign)
-library(psych)
-library(ggjoy)
-library(ltm)
+library(brms)
+library(tidyverse)
+library(ggplot2)
+library(tictoc)
+library(modelr)
+library(tidybayes)
 library(dplyr)
-library(lavaan)
+library(cowplot)
 
-setwd("/Users/chrisweber/authoritarianism_book_v2/")
-load("pooled.auth.Rdata")
-source("/Users/chrisweber/authoritarianism_book_v2/analysis/BookFunctions.r")
-data$group = ifelse(data$white    == 1, 1, 0)
-data$group = ifelse(data$black    == 1, 2, data$group)
-data$group = ifelse(data$hispanic == 1, 3, data$group)
-data = subset(data, group !=0)
+### These are user functions
+### 1990 ANES ####
+data_location = "/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data/"
+setwd("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/Chapters/Chapter8/Chapter6")
+####
+load("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data/pooled.auth.rda")  ### Just work from this data; everything should be here, recoded.
+#####
+ggtheme = theme(
+        plot.title=element_text(face="bold",hjust=-.08,vjust=0,colour="#3C3C3C",size=12),
+        axis.text.x=element_text(size=9,colour="#535353",face="bold"),
+        axis.text.y=element_text(size=9,colour="#535353",face="bold"),
+        axis.title.y=element_text(size=11,colour="#535353",face="bold",vjust=1.5),
+        axis.ticks=element_blank(),
+        panel.grid.major=element_line(colour="#D0D0D0",size=.25),
+        panel.background=element_rect(fill="white")) 
+####
+data$authoritarianism_2 = data$authoritarianism^2
 
-data<-subset(data, year!=1990) ## Drop 1990
-data<-subset(data, year!=1994) ## Drop 1990
-data$mode<-as.character(data$mode)
-################ UPDATE  ###########
-data<-subset(data, year ==2020 | (mode=="FTF"|mode=="FTC/CASI" ) )## Drop 1990
+tmp_dat = data[,c("vote", "authoritarianism", "authoritarianism_2",
+                 "female", "age", "college", "income",
+                 "jewish", "catholic", "other", "year")] %>% na.omit()
+# fit0a <- brm(vote~ female + age + college + income + jewish + 
+#                  catholic + other + authoritarianism +  
+#                  (1|year), 
+#                  family = bernoulli(link = "logit"),
+#                  data = tmp_dat, 
+#                  chains = 3, cores = 4, seed = 1234, 
+#                  iter = 3000)
+# save(fit0a, file = "random_intercept.rda")
 
-data$ideology<-(data$ideology-1)/6
-data$racial.resentment<-(rowMeans(cbind(data$rr1, data$rr2, data$rr3, data$rr4), na.rm=T)-1)/4
-data$auth.observed<-(rowMeans(cbind(data$auth.1, data$auth.2, data$auth.3, data$auth.4), na.rm=T)-1)/4
-data$identifier = seq(1:nrow(data))
-#### Estimate a latent variable model #### 
-#### Just vanilla one factor model ####
-#### with varying slopes (i don't know about this)
+# fit0b <- brm(vote~ female + age + college + income + jewish + 
+#                  catholic + other + authoritarianism +  
+#                  (1+authoritarianism|year), 
+#                  family = bernoulli(link = "logit"),
+#                  data = tmp_dat, 
+#                  chains = 3, cores = options(mc.cores = parallel::detectCores()), seed = 1234, 
+#                  iter = 3000)
+# save(fit0b, file = "random_slope.rda")
+
+# fit1 <- brm(vote~ female + age + college + income + jewish + 
+#                  catholic + other + authoritarianism + authoritarianism_2 + 
+#                  (1+authoritarianism+ authoritarianism_2|year), 
+#                  family = bernoulli(link = "logit"),
+#                  data = tmp_dat, 
+#                  chains = 3, cores = options(mc.cores = parallel::detectCores()), seed = 1234, 
+#                  iter = 3000)
+# save(fit1, file = "random_slope_quad.rda")
 
 
-dat_fscores<-data.frame(identifier = data$identifier,
-                        auth.1 = data$auth.1, 
-                        auth.2 = data$auth.2, 
-                        auth.3 = data$auth.3, 
-                        auth.4 = data$auth.4,
-                        group = data$group) %>%  na.omit()
 
-mod <-  "latent =~ auth.1 + auth.2 + auth.3 + auth.4"
-model1 = cfa(mod, ordered=names(dat_fscores)[2:5], 
-             data=dat_fscores, group = "group")  
-a= lavPredict(model1, append.data = TRUE,  assemble = TRUE) %>% as.data.frame()
-## Test if order is wrong
-test = data.frame(dat_fscores, a)
-table(test$auth.1.1 == test$auth.1)
-table(test$auth.2.1 == test$auth.2)
-table(test$auth.3.1 == test$auth.3)
-table(test$auth.4.1 == test$auth.4)
-# All good
+load("random_intercept.rda")
+
+load("random_slope.rda")
+
+load("random_slope_quad.rda")
+
+
+loo(fit0a, fit0b, fit1)
+
+# Some of these statistics are computationally intensive and take
+# a bit to estimate.
+# Here is the loo output
+
+# Model comparisons:
+#       elpd_diff se_diff
+# fit1     0.0       0.0 
+# fit0b  -61.8      11.2 
+# fit0a -167.8      17.8 
+
+## Check basic diagnostics for both models first ###
+posterior = as.matrix(fit1)
+color_scheme_set("mix-brightblue-gray")
+library(shinystan)
+launch_shinystan(fit1)
+## There's really nothing problematic about these appproaches, other than the quadratic specification is better. Both fit well.
+
+### Non-linear model ###
+expanded_dat = tmp_dat %>% group_by(year) %>% data_grid(female = mean(female), age = mean(age), 
+                                                      college = mean(college), income = mean(income), 
+                                                      catholic =  mean(catholic), jewish = mean(jewish), 
+                                                      other = mean(other), 
+                                                      authoritarianism = seq_range(authoritarianism, n = 11)) %>%   
+                                                      mutate(authoritarianism_2 = authoritarianism^2)
+model1 = expanded_dat %>%  
+          add_linpred_draws(fit1) %>% 
+          mutate(Vote_Republican = plogis(.linpred))   
+
+### Non-linear model ###
+expanded_dat = tmp_dat %>% group_by(year) %>% data_grid(female = mean(female), age = mean(age), 
+                                                      college = mean(college), income = mean(income), 
+                                                      catholic =  mean(catholic), jewish = mean(jewish), 
+                                                      other = mean(other), 
+                                                      authoritarianism = seq_range(authoritarianism, n = 11))
+model0 = expanded_dat %>%  
+          add_linpred_draws(fit0b) %>% 
+          mutate(Vote_Republican = plogis(.linpred))  
+
+linear_model = model0 %>%  ggplot(aes(x = authoritarianism)) + facet_wrap(~year) + 
+      stat_lineribbon(aes(y = Vote_Republican), .width = c(.95, .5), color = "grey", alpha = 0.6) +
+            scale_fill_brewer()  +
+  # Format the grid
+  ggtitle("Authoritarianism and Presidential Vote. Linear Model ") +
+  scale_y_continuous("Probability of Republican Vote", limits=c(0,1))+
+  scale_x_continuous("Authoritarianism") + ggtheme +
+ theme(legend.title = element_blank()) +
+  theme(legend.position = "none")
+  
+
+nonlinear_model = model1 %>%  ggplot(aes(x = authoritarianism)) + facet_wrap(~year) + 
+      stat_lineribbon(aes(y = Vote_Republican), .width = c(.95, .5), color = "grey", alpha = 0.6) +
+      scale_fill_brewer()  +
+  # Format the grid
+  ggtitle("Authoritarianism and Presidential Vote. Quadratic Model ") +
+  scale_y_continuous("Probability of Republican Vote", limits=c(0,1))+
+  scale_x_continuous("Authoritarianism") + ggtheme + 
+  theme(legend.title = element_blank()) +
+  theme(legend.position = "none")
+  
+save_plot("linear.pdf",    linear_model, ncol = 2,    base_asp = 1.68, base_height = 5, base_width = 5)
+save_plot("nonlinear.pdf", nonlinear_model, ncol = 2, base_asp = 1.68, base_height = 5, base_width = 5)
+### This is correct, as far as I can tell. 
+## Create a marginal effect function @@
+
+
+
+### Model to estimate AME
+expanded_dat_0 = tmp_dat %>% group_by(year) %>% data_grid(female = female, age = age, 
+                                                      college = college, income = income, 
+                                                      catholic =  catholic, jewish = jewish, 
+                                                      other = other, 
+                                                      authoritarianism =  quantile(authoritarianism, 0.025)) %>% as.data.frame()
+
+expanded_dat_1 =  expanded_dat_0 %>% 
+                      mutate(authoritarianism = quantile(tmp_dat$authoritarianism, 0.975)) %>% as.data.frame()
+
+dif =   ((posterior_linpred(fit0b, newdata = expanded_dat_1, draws = 1000) %>% plogis()) ) -  
+         (posterior_linpred(fit0b, newdata = expanded_dat_0, draws = 1000)%>% plogis()) %>% t() %>% as.data.frame() 
+dif$max   = apply(dif, 1, quantile,  0.975)
+dif$mean  = apply(dif, 1, quantile, 0.5)
+dif$min  =  apply(dif, 1, quantile,  0.025)
+dif      =  dif %>% subset(select = c("max", "mean", "min"))
+
+
+### Model to estimate AME
+expanded_dat_0 = tmp_dat %>% group_by(year) %>% data_grid(female = female, age = age, 
+                                                      college = college, income = income, 
+                                                      catholic =  catholic, jewish = jewish, 
+                                                      other = other, 
+                                                      authoritarianism =  quantile(authoritarianism, 0.025)) %>%   
+                                                      mutate(authoritarianism_2 = authoritarianism^2) %>% data.frame()
+
+expanded_dat_1 =  expanded_dat_0 %>% 
+                      mutate(authoritarianism = quantile(tmp_dat$authoritarianism, 0.975)) %>%   
+                      mutate(authoritarianism_2 = authoritarianism^2) %>% data.frame()
+
+dif =   ((posterior_linpred(fit2, newdata = expanded_dat_1, draws = 100) %>% plogis()) )-  (posterior_linpred(fit2, newdata = expanded_dat_0, draws = 100)%>% plogis()) %>% t() %>% as.data.frame() 
+dif$max   = apply(dif, 1, quantile,  0.975)
+dif$mean  = apply(dif, 1, quantile, 0.5)
+dif$min  = apply(dif, 1, quantile,  0.025)
+dif      = dif %>% select(c(max, mean, min))
+
+
+### Model to estimate AME
+expanded_dat_0 = tmp_dat %>% group_by(year) %>% data_grid(female = mean(female), age = mean(age), 
+                                                      college = mean(college), income = mean(income), 
+                                                      catholic =  mean(catholic), jewish = mean(jewish), 
+                                                      other = mean(other), 
+                                                      authoritarianism =  quantile(authoritarianism, 0.025)) %>%   
+                                                      mutate(authoritarianism_2 = authoritarianism^2) %>% data.frame()
+expanded_dat_1 =  expanded_dat_0 %>% 
+                      mutate(authoritarianism = quantile(tmp_dat$authoritarianism, 0.975)) %>%   
+                      mutate(authoritarianism_2 = authoritarianism^2) %>% data.frame()
+
+dif =   ((posterior_linpred(fit2, newdata = expanded_dat_1, draws = 100) %>% plogis) )-  (posterior_linpred(fit2, newdata = expanded_dat_0, draws = 100)%>% plogis) %>% t() %>% as.data.frame() 
+dif$max   = apply(dif, 1, quantile,  0.975)
+dif$mean  = apply(dif, 1, quantile, 0.5)
+dif$min  = apply(dif, 1, quantile,  0.025)
+dif      = dif %>% select(c(max, mean, min))
+
+
+mutate(max =  quantile(prob = 0.975)) %>% 
+         
+         
+         quantile(prob  = 0.975)) %>% 
+         mutate(min =   quantile(prob  = 0.025)) %>% 
+         mutate(mean =  quantile(prob  = 0.50)) %>%
+         mutate(year = c(1992, 2000, 2004, 2008, 2012, 2016, 2020)) 
+
+%>% apply(2, quantile, prob = 0.025)
+max =    posterior_linpred(fit2, newdata = expand)
+
+
+ %>% apply(2, quantile, prob = 0.975)
+median = posterior_linpred(fit2, newdata = expand) %>% apply(2, quantile, prob = 0.5)
+
+margins = expanded_dat_0 %>% data.frame() %>% mutate(help =min)
+
+
+
+group_by(year) %>% mutate(min = min) 
+
+%>% mutate(max = max) %>% mutate(median = median)
+        
+
+
+
+
+%>% as.data.frame() %>% select(Estimate)
+            
+            
+                    tst =                            expanded_dat_marginal       %>%  
+                                                      add_linpred_draws(fit2, ndraws = 100) %>% 
+                                                      mutate(Vote_Republican = plogis(.linpred))   
+
+
+plot(conditional_effects(fit2), ask = FALSE)
+
+
+plot(marginal_effects(fit2, effects = "authoritarianism", 
+                      data = mdata, re_formula = NULL), rug = TRUE)
+
+
+
+fit1 <- brm(vote~ 
+                 female + age + college + income + jewish + 
+                 catholic + other + authoritarianism+ (1 + authoritarianism|year), 
+                 family = bernoulli(link = "logit"),
+                 data = tmp_dat, 
+                 chains = 5, cores = 2, seed = 1234, 
+                 iter = 5000)  ## About  12 minutes
+        
+
+#### Generate Prediction, Post estimation Stuff$
+
+
+### Several methofds
+library(modelr)
+expand_dat = tmp_dat %>% group_by(year) %>% data_grid(female = mean(female), age = mean(age), 
+                                                      college = mean(college), income = mean(income), 
+                                                      catholic =  mean(catholic), jewish = mean(jewish), 
+                                                      other = mean(other), authoritarianism = seq_range(authoritarianism, n = 5)) 
+
+
+est =     expand_dat%>%  add_linpred_draws(fit1, n_draws =100) %>% mutate(Vote_Republican = plogis(.linpred))
+
+
+
+
+
+tt = as.formula(vote~ 
+                 female + age + college + income + jewish + 
+                 catholic + other + authoritarianism)
+all.vars(tt)[-1]
+
+
+data_grid(fit1, authoritarianism = seq_range(authoritarianism, n = 5))
+
+
+posterior_predict(fit1, expand_dat) %>% dim()
+tmp_dat = tmp_dat %>%  group_by(year) %>%
+    do(sample_n(., size = 100, replace = FALSE))  ## Random draw from each survey
+
+library(modelr)
+library(tidybayes)
+
+expand_dat = tmp_dat %>% group_by(year) %>% data_grid(  female, age, college, income, catholic, jewish, other, authoritarianism = seq_range(authoritarianism, n = 5)) 
+
+
+
+
+
+est %>%  subset(year == 1992) %>%
+  ggplot(aes(x = authoritarianism, y = .linpred)) +
+    geom_line() 
+
+  
+  
+  
+   .width = c(.99, .95, .8, .5), color = "#08519C") +
+  scale_fill_brewer()
+
+
+
+
+
+fit2 <- brm(vote~
+                 authoritarianism+ authoritarianism_2 +
+                 female+age+college+income+
+                 jewish+catholic+other + (1 + authoritarianism+authoritarianism_2|year), 
+                 family = bernoulli(link = "logit"),
+                 data = data, 
+                 chains = 2, cores = 2)
+library(tidybayes)
+
+fit2 %>% as.matrix() %>% get_variables()
+
+## Extract posteriors of authoritarianism
+fit1 %>% as.matrix() %>%
+  spread_draws(`b_authoritarianism`, r_year[year,]) %>%
+  mutate(authoritarianism_mean = b_authoritarianism + r_year) %>%
+  median_qi(authoritarianism_mean)
+
+l
+
+     cool_shit %>%  median_qi
+  ggplot(aes(x = authoritarianism, y = .epred, color = ordered(cyl))) +
+  stat_lineribbon(aes(y = .epred)) +
+  geom_point(data = mtcars) +
+  scale_fill_brewer(palette = "Greys") +
+  scale_color_brewer(palette = "Set2")
+  add_epred_draws(m_mpg) %>%
+  ggplot(aes(x = hp, y = mpg, color = ordered(cyl))) +
+  stat_lineribbon(aes(y = .epred)) +
+  geom_point(data = mtcars) +
+  scale_fill_brewer(palette = "Greys") +
+  scale_color_brewer(palette = "Set2")
+
+mtcars %>%
+  group_by(cyl) %>%
+  data_grid(hp = seq_range(hp, n = 51)) %>%
+  add_epred_draws(m_mpg) %>%
+  ggplot(aes(x = hp, y = mpg, color = ordered(cyl))) +
+  stat_lineribbon(aes(y = .epred)) +
+  geom_point(data = mtcars) +
+  scale_fill_brewer(palette = "Greys") +
+  scale_color_brewer(palette = "Set2")
+
+fit2 %>% as.matrix() %>%
+  spread_draws(`b_authoritarianism_2`, r_year[year,]) %>%
+  mutate(authoritarianism_mean = b_authoritarianism_2 + r_year) %>%
+  median_qi(authoritarianism_mean)
+
+fit2 %>% as.matrix() %>%
+  spread_draws(`b_authoritarianism`, r_year[year,]) %>%
+  mutate(authoritarianism_mean = b_authoritarianism + r_year) %>%
+  median_qi(authoritarianism_mean)
+  
+fit2 %>% as.matrix() %>%
+  spread_draws(`b_authoritarianism`, `b_authoritarianism_2`,  r_year[year,]) %>%
+  mutate(authoritarianism_mean = b_authoritarianism + b_authoritarianism_2) %>%
+  median_qi(authoritarianism_mean)
+
+
+### Authoritianism increases in its effect over tim
+fit1 %>% as.matrix() %>%
+  spread_draws(r_year[year,authoritarianism]) %>%
+  summarise_draws()
+
+  group_by(year) %>%
+  median_qi(r_year)
+
+
+library(bayesplot)
 library(dplyr)
-dat_fscores$latent = a$latent %>% zero.one()
-data =  merge(data, dat_fscores, "identifier", all.x = T)
-data$authoritarianism = data$latent
-#### Sanity Check:
-corr.test(data$authoritarianism, data$auth.observed) # Of course it makes no difference.
-detach("package:dplyr")
-library(car)
-#data$knowledge<-rowMeans(cbind(data$knowledge.defensec, data$knowledge.govc, data$knowledge.governmentc), na.rm=T)
-data$split.ticket<-recode(as.character(data$split.house), "'DP-DC'=0; 'DP-RC'=1; 'RP-DC'=1; 'RP-RC'=0; else=NA")
-data$efficacy<-rowMeans(cbind(data$efficacy1, data$efficacy2, data$efficacy3, data$efficacy5, data$efficacy6, data$efficacy7), na.rm=T)
-data$knowledge<-((rowMeans(cbind(data$know.interview.pre, data$know.interview.post), na.rm=T)-1)/4)
-data$age<-(data$age-17)/80
-data$interaction<-data$authoritarianism*data$pid
-data$republican<-recode(data$pid*6+1, "1:2=0; 3:5=0; 6:7=1" )
-data$democrat<-recode(data$pid*6+1, "1:2=1; 3:5=0; 6:7=0" )
-data$independent<-recode(data$pid*6+1, "1:2=0; 3:5=1; 6:7=0" )
-#data$party3<-recode(data$pid*6+1, "1:2='Democrat'; 3:5='Independent'; 6:7='Republican'; else=NA" )
-#data$republican<-recode(data$pid*6+1, "1:2=0; 4=0; 5:7=1" )
-#data$democrat<-recode(data$pid*6+1, "1:3=1; 4=0; 5:7=0" )
-#data$independent<-recode(data$pid*6+1, "1:3=0; 4=1; 4:7=0" )
-data$party3<-recode(data$pid*6+1, "1:2='Democrat'; 3:5='Independent'; 6:7='Republican'; else=NA" )
+as.matrix(fit1) %>% mcmc_areas(pars = c("college", "authoritarianism"),
+                                prob = 0.8) + plot_title("Posteriors")
+
+loo(loo(fit1), (fit2))
+# https://mc-stan.org/bayesplot/
+
+# Compare fit, loo whatever
+# Print posterior predictions
+# Generate predictions starting with the 'spaghetti plot'
 
 
-with(data, psych::alpha(cbind(dem.decent, dem.know,
-                              dem.leader, dem.cares)))
-
-data$dem_traits = abs(zero.one(with(data, rowMeans(cbind(dem.know, dem.decent,
-                                                         dem.leader, dem.cares), na.rm = T)))-1)
-
-
-with(data, psych::alpha(cbind(rep.decent, rep.know,
-                              rep.leader, rep.cares)))
-
-data$rep_traits = abs(zero.one(with(data, rowMeans(cbind(rep.know, rep.decent,
-                                                         rep.leader, rep.cares), na.rm = T)))-1)
-
-
-data$dem_anxiety = zero.one(with(data, rowMeans(cbind(dem.angry, dem.afraid), na.rm = T)))
-data$rep_anxiety = zero.one(with(data, rowMeans(cbind(rep.angry, rep.afraid), na.rm = T)))
-
-
-### Create a directional Measures ####
-
-data$out_animosity = ifelse(data$party3 == "Democrat", data$rep_anxiety, 
-                            ifelse(data$party3 == "Republican", data$dem_anxiety, NA))
-
-data$out_tanimosity = ifelse(data$party3 == "Democrat", data$rep_traits, 
-                             ifelse(data$party3 == "Republican", data$dem_traits, NA))
-
-
-data$participation<-rowSums(cbind(data$p1, data$p2, data$p3, data$p4, data$p5), na.rm=T)
-data$AuthXRep<-data$authoritarianism*data$republican
-data$AuthXInd<-data$authoritarianism*data$independent
-psych::alpha(with(data, cbind(egal1, egal2, egal3, egal4)))
-psych::alpha(with(data[data$year==1992,], cbind(egal1, egal2, egal3, egal4)))
-psych::alpha(with(data[data$year==2000,], cbind(egal1, egal2, egal3, egal4)))
-psych::alpha(with(data[data$year==2004,], cbind(egal1, egal2, egal3, egal4)))
-psych::alpha(with(data[data$year==2008,], cbind(egal1, egal2, egal3, egal4)))
-psych::alpha(with(data[data$year==2012,], cbind(egal1, egal2, egal3, egal4)))
-psych::alpha(with(data[data$year==2016,], cbind(egal1, egal2, egal3, egal4)))
-
-psych::alpha(with(data, cbind(moral1, moral2, moral3, moral4)))
-
-data$egalitarianism<-zero.one(rowMeans(with(data, cbind(egal1, egal2, egal3, egal4)),
-                                       na.rm=T))
-data$moral.traditionalism<-zero.one(rowMeans(with(data, cbind(moral1, moral2, moral3, moral4)),
-                                             na.rm=T))
-data$services = zero.one(data$gov.services)
-
-### Construct Emotion Measures ###
-cor.test(data$dem.angry, data$dem.afraid)
-cor.test(data$rep.angry, data$rep.afraid)
-
-white.data<-subset(data, white==1)
-black.data<-subset(data, black==1)
-hispanic.data<-subset(data, hispanic==1)
-nonwhite.data<-subset(data, nonwhite==1)
 
 ##### Effects, Figures 1 -3, Vote, Candidate Affect, Partisan Affect
 
