@@ -3,6 +3,8 @@ rm(list = ls())
 ###  Data Description ##
 # More transformations and data recodes.....
 source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/configurations.r")
+source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/user_function.r")
+
 detach("package:dplyr")
 library(brms)
 library(tidyverse)
@@ -154,6 +156,10 @@ dif$max   = apply(dif, 1, quantile,  0.975)
 dif$mean  = apply(dif, 1, quantile, 0.5)
 dif$min  =  apply(dif, 1, quantile,  0.025)
 dif      =  dif %>% subset(select = c("max", "mean", "min"))
+
+model1 = expanded_dat %>%  
+          add_linpred_draws(fit1) %>% 
+          mutate(Vote_Republican = plogis(.linpred))   
 
 
 ### Model to estimate AME
