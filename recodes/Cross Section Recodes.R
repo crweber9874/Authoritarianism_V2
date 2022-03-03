@@ -357,7 +357,7 @@ data.cumulative.anes<-data.frame(female, college,
                           weights.all, weights.ftf, weights.web,
                           anger.dem, fear.dem, hope.dem, proud.dem, 
                           anger.rep, fear.rep, hope.rep, proud.rep,
-                          feel.black, feel.latino, feel.asian, aid.blacks, reps, dem)
+                          feel.black, feel.latino, feel.asian, aid.blacks, reps, dems)
 
 require(foreign)                          
 ####-------------------------------------------------------------------------------------####
@@ -521,8 +521,8 @@ trump.speaks<-recode(data$V161168, "1=5; 2=4; 3=3; 4=2; 5=1; else=NA")
 clinton.speaks<-recode(data$V161163, "1=5; 2=4; 3=3; 4=2; 5=1; else=NA")
 clinton.even<-recode(data$V161169, "1=5; 2=4; 3=3; 4=2; 5=1; else=NA") #Even tempered
 trump.even<-recode(data$V161170, "1=5; 2=4; 3=3; 4=2; 5=1; else=NA")
-alpha(cbind(trump.strong, trump.care, trump.knowledge, trump.honest, trump.speaks, trump.even))
-alpha(cbind(clinton.strong, clinton.care, clinton.knowledge, clinton.honest, clinton.speaks, clinton.even))
+psych::alpha(cbind(trump.strong, trump.care, trump.knowledge, trump.honest, trump.speaks, trump.even))
+psych::alpha(cbind(clinton.strong, clinton.care, clinton.knowledge, clinton.honest, clinton.speaks, clinton.even))
 trump.character<-(rowMeans(cbind(trump.strong, trump.care, trump.knowledge, trump.honest, trump.speaks, trump.even), na.rm=T)-1)/4
 clinton.character<-(rowMeans(cbind(clinton.strong, clinton.care, clinton.knowledge, clinton.honest, clinton.speaks, clinton.even), na.rm=T)-1)/4
 #### Income###
@@ -616,7 +616,7 @@ moral2<-recode(data$V162210, "1=5; 2=4; 3=3; 4=2; 5=1; else=NA")   #Should be Mo
 moral3<-recode(data$V162209, "1=1; 2=2; 3=3; 4=4; 5=5; else=NA")  #Tolerance of Different Moral Standards
 moral4<-recode(anes$V162208, "1=5; 2=4; 3=3; 4=2; 5=1; else=NA")  #Newer lifestyles contributing to societal breakeown
 
-alpha(cbind(moral1, moral2, moral3))
+psych::alpha(cbind(moral1, moral2, moral3))
 moral.traditionalism<-(rowMeans(cbind(moral1, moral2, moral3), na.rm=T)-1)/4
 
 
@@ -648,7 +648,7 @@ hostile1<-recode(data$V161507, "1=5; 2=4 ; 3=3 ;4=2; 5=1;  else=NA") ### Inerpre
 hostile2<-recode(data$V161508, "1=5; 2=4 ; 3=3 ;4=2; 5=1;  else=NA") ### Consider what men do.
 hostile3<-recode(data$V161509, "1=5; 2=4 ; 3=3 ;4=2; 5=1;  else=NA") ### Gain power through feminism
 hostile4<-recode(data$V161510, "1=5; 2=4 ; 3=3 ;4=2; 5=1;  else=NA") ### Put on tight leash
-alpha(cbind(hostile1, hostile2, hostile3, hostile4))
+psych::alpha(cbind(hostile1, hostile2, hostile3, hostile4))
 hostile<-(rowMeans(cbind(hostile1, hostile2, hostile3, hostile4), na.rm=T)-1)/4
 
 
@@ -1163,7 +1163,7 @@ for(i in 1:dim(data)[2]){
 data$rid2<-seq(1:nrow(data))
 ##### Measures ######
 
-save(data, file= "pooled.auth.Rdata")
+save(data, file= "pooled.auth_ns.Rdata")
 
 write.dta(data, file="pooled.ANES.dta")
 

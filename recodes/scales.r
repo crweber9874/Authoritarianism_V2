@@ -3,33 +3,44 @@ rm(list = ls())
 # More transformations and data recodes.....
 source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/configurations.r")
 ### Set working directory 
-setwd("/Users/chrisweber/Dropbox/Data/Panel_Data_Files")
 ### These are user functions
 ### 1990 ANES ####
 data_location = "/Users/chrisweber/Dropbox/Data/cross_sectional"
 setwd("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data")
 detach("package:dplyr")
-load("pooled.auth.Rdata")
+load("pooled.auth_ns.Rdata")
 
 data$group = ifelse(data$white    == 1, 1, 0)
 data$group = ifelse(data$black    == 1, 2, data$group)
 data$group = ifelse(data$hispanic == 1, 3, data$group)
 
-data = subset(data, group !=0)
-
+#### Subset to whites
+data = subset(data, group ==1)
+#### Drop mids
 data<-subset(data, year!=1990) ## Drop 1990
 data<-subset(data, year!=1994) ## Drop 1990
 data$mode<-as.character(data$mode)
-################ UPDATE  ###########
 data<-subset(data, year ==2020 | (mode=="FTF"|mode=="FTC/CASI" ) )## Drop 1990
 data$ideology<-zero.one(data$ideology)
+psych::alpha(cbind(data$rr1, data$rr2, data$rr3, data$rr4))  #.86
+data$racial.resentment<-zero.one(rowMeans(cbind(data$rr1, data$rr2, data$rr3, data$rr4), na.rm=T)) 
 
-psych::alpha(cbind(data$rr1, data$rr2, data$rr3, data$rr4))  #.82
-data$racial.resentment<-(rowMeans(cbind(data$rr1, data$rr2, data$rr3, data$rr4), na.rm=T)-1)/4
 
+##### Create a latent authoritarianism score #####
+data$id       <-  c(1:dim(data)[1])
+DATA          <-  na.omit(data[,c("id", "auth.1", "auth.2", "auth.3", "auth.4")])
+DATA$short_id <-  c(1:dim(DATA)[1])
+FORMULA         =  "latent =~  auth.1 + auth.2 + auth.3 + auth.4"
+ORDERED         = c("auth.1", "auth.2", "auth.3", "auth.4")
+model = lavaan::cfa(FORMULA, ordered=ORDERED, data=DATA)  
+predictions = data.frame(lavPredict(model, append.data = TRUE,  assemble = FALSE))
+predictions$short_id<-c(1:dim(DATA)[1])
+temp =  merge(DATA, predictions, "short_id", all.x = T)
+data = merge(data, temp, by = "id", all.x = TRUE)
 psych::alpha(cbind(data$auth.1, data$auth.2, data$auth.3, data$auth.4))    #0.68
-data$authoritarianism <- zero.one(rowMeans(cbind(data$auth.1, data$auth.2, data$auth.3, data$auth.4), na.rm=T))
-data$identifier = seq(1:nrow(data))
+data$authoritarianism_sum <- zero.one(rowMeans(cbind(data$auth.1, data$auth.2, data$auth.3, data$auth.4), na.rm=T))
+data$authoritarianism <- zero.one(data$latent)
+cor.test(data$latent, data$authoritarianism_sum) # 
 #### Estimate a latent variable model #### 
 #### Just vanilla one factor model ####
 #### with varying slopes (i don't know about this)
