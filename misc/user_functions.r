@@ -18,7 +18,7 @@ softmax <- function(par){
 # Pass "mod formula" -- or dissect from other mod formula ###
 # The rest can be dumped into that function. Main by authoritarianism
 # generates the probability of each category
-
+ 
 
 ################################################################################################################
 ####################### Main Effects Estimates: Probability of cat 1-5, each time point #######################
