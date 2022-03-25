@@ -97,7 +97,7 @@ for (i in 1:dim(panel.1992)[2]){
 }
 
 ### 2000 ANES ####
-data.2000<-haven::read_dta("anes2000_2004.dta")
+data.2000<-haven::read_dta("anes2000_2004.dta") %>% data.frame()
 names(data.2000)
 panel.2000<-data.frame(id=data.2000$ID)
 
@@ -203,7 +203,7 @@ for (i in 1:dim(panel.2000)[2]){
 }
 
 ###2008 ANES###
-data.2008<-haven::read_dta("anes2008_2009.dta")
+data.2008<-haven::read_dta("anes2008_2009.dta") %>% as.data.frame()
 data.off<-foreign::read.spss("offwave.sav",
                      use.value.labels=FALSE, to.data.frame=TRUE)
 data.2008<-merge(data.2008, data.off, by=c("caseid"))

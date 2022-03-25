@@ -68,151 +68,122 @@ dat2016 = dat2016 %>%
 library(brms)
 
 
-cohorts = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
-                    income.2000 + authoritarianism + authoritarianism_2 + 
-                    boomer + gen_x   + 
-                    vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 + 
-                    vote1:boomer + vote1:boomer + 
-                     authoritarianism:boomer + authoritarianism_2:boomer + 
-                     authoritarianism:gen_x + authoritarianism_2:gen_x,
-              family = bernoulli(link = "logit"),
-               data = dat2000, 
-               chains = 3, 
-               cores = 4, 
-               seed = 1234, 
-               iter = 2000,
-               control = list(adapt_delta = 0.9,
-                              max_treedepth = 15))    
-### PID, 2000
+# cohorts = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
+#                     income.2000 + authoritarianism + authoritarianism_2 + 
+#                     boomer + gen_x   + 
+#                     vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 + 
+#                     vote1:boomer + vote1:boomer + 
+#                      authoritarianism:boomer + authoritarianism_2:boomer + 
+#                      authoritarianism:gen_x + authoritarianism_2:gen_x,
+#               family = bernoulli(link = "logit"),
+#                data = dat2000, 
+#                chains = 3, 
+#                cores = 4, 
+#                seed = 1234, 
+#                iter = 2000,
+#                control = list(adapt_delta = 0.9,
+#                               max_treedepth = 15))    
+# ### PID, 2000
 
-cohorts2 = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
-                    income.2000 + authoritarianism + authoritarianism_2 + 
-                    boomer + gen_x   + 
-                    vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 + 
-                    vote1:boomer + vote1:boomer + 
-                     authoritarianism:boomer + authoritarianism_2:boomer + 
-                     authoritarianism:gen_x + authoritarianism_2:gen_x,
-              family = bernoulli(link = "logit"),
-               data = dat2000, 
-               chains = 3, 
-               cores = 4, 
-               seed = 1234, 
-               iter = 2000,
-               control = list(adapt_delta = 0.9,
-                              max_treedepth = 15))    
-### PID, 2000
+# cohorts2 = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
+#                     income.2000 + authoritarianism + authoritarianism_2 + 
+#                     boomer + gen_x   + 
+#                     vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 + 
+#                     vote1:boomer + vote1:boomer + 
+#                      authoritarianism:boomer + authoritarianism_2:boomer + 
+#                      authoritarianism:gen_x + authoritarianism_2:gen_x,
+#               family = bernoulli(link = "logit"),
+#                data = dat2000, 
+#                chains = 3, 
+#                cores = 4, 
+#                seed = 1234, 
+#                iter = 2000,
+#                control = list(adapt_delta = 0.9,
+#                               max_treedepth = 15))    
+# ### PID, 2000
 
-cohort_2000_pid = brm(pid3.2 ~ sex.2000 + age.2000 + college.2000 + 
-             income.2000 + authoritarianism + authoritarianism_2 + 
-             republican  + independent + 
-             boomer + gen_x   + 
-             ##
-             authoritarianism:boomer + authoritarianism_2:boomer + 
-             authoritarianism:gen_x + authoritarianism_2:gen_x  + 
-             ##
-             authoritarianism:republican  + 
-             authoritarianism_2:republican + 
-             authoritarianism:independent  + 
-             authoritarianism_2:independent  +
-             ###
-             republican:boomer + independent:boomer + 
-             republican:gen_x + independent:gen_x + 
-             ###
-             republican:boomer:authoritarianism + independent:boomer:authoritarianism+
-             republican:gen_x:authoritarianism + republican:gen_x:authoritarianism +
+# cohort_2000_pid = brm(pid3.2 ~ sex.2000 + age.2000 + college.2000 + 
+#              income.2000 + authoritarianism + authoritarianism_2 + 
+#              republican  + independent + 
+#              boomer + gen_x   + 
+#              ##
+#              authoritarianism:boomer + authoritarianism_2:boomer + 
+#              authoritarianism:gen_x + authoritarianism_2:gen_x  + 
+#              ##
+#              authoritarianism:republican  + 
+#              authoritarianism_2:republican + 
+#              authoritarianism:independent  + 
+#              authoritarianism_2:independent  +
+#              ###
+#              republican:boomer + independent:boomer + 
+#              republican:gen_x + independent:gen_x + 
+#              ###
+#              republican:boomer:authoritarianism + independent:boomer:authoritarianism+
+#              republican:gen_x:authoritarianism + republican:gen_x:authoritarianism +
 
-             republican:boomer:authoritarianism_2 + independent:boomer:authoritarianism_2+
-             republican:gen_x:authoritarianism_2 + republican:gen_x:authoritarianism_2,
-              family = categorical(link = "logit"),
-               data = dat2000, 
-               chains = 3, 
-               cores = 8, 
-               seed = 1234, 
-               iter = 2000,
-               control = list(adapt_delta = 0.9,
-                              max_treedepth = 15)
-               )   
+#              republican:boomer:authoritarianism_2 + independent:boomer:authoritarianism_2+
+#              republican:gen_x:authoritarianism_2 + republican:gen_x:authoritarianism_2,
+#               family = categorical(link = "logit"),
+#                data = dat2000, 
+#                chains = 3, 
+#                cores = 8, 
+#                seed = 1234, 
+#                iter = 2000,
+#                control = list(adapt_delta = 0.9,
+#                               max_treedepth = 15)
+#                )   
 
 
-dat2000 %>% data_grid(sex.2000 = mean(sex.2000), age.2000 = mean(age.2000), 
-                       college.2000= mean(college.2000), income.2000 = mean(income.2000), 
-                       authoritarianism = seq_range(authoritarianism, n = 2),
-                       vote1 = c(0,1),
-                       boomer = c(0,1),
-                       gen_x  =c(0,1)) %>% 
-                       mutate(authoritarianism_2 = authoritarianism*authoritarianism) %>%
-                       add_linpred_draws(cohorts)  %>% 
-                       mutate(Vote_Republican = plogis(.linpred))  %>%
-                       mutate(Vote_Democrat   = 1 - plogis(.linpred))  %>%
-                       mutate(Authoritarianism = recode(authoritarianism, `0` = "Non-Authoritarian", `1` = "Authoritarian")) %>%                      
-                       mutate(Generation = ifelse(boomer == 1, "boomer", 
-                                              ifelse(gen_x ==1, "GenX",
-                                                 ifelse(gen_x ==0 & boomer ==0, "Silent/Greatest", 
-                                                                                                  NA)))) %>%
-                       mutate(Vote_Choice = ifelse(vote1 ==1, "Bush",
-                                                ifelse(vote1 ==0, "Gore", NA))) %>% 
-                      filter(!is.na(Generation)) %>%
-                    ggplot(aes(y = as.factor(Generation), 
-                          x = Vote_Republican, 
-                          fill = as.factor(Vote_Choice)))  +  facet_wrap(~Authoritarianism) + 
-            geom_density_ridges2(alpha = 0.45, scale = 3, show.legend = FALSE , 
-                                  quantile_lines = TRUE, quantiles = 0.5, rel_min_height = 0.01,
-                                   quantiles = 0.5,  calc_ecdf = FALSE,
-                                    jittered_points = TRUE, position = position_points_jitter(width = 0.05, height = 0),
-                                     point_shape = 3, point_size = 1, point_color = "black", point_alpha = 0.01  ) 
+# dat2000 %>% data_grid(sex.2000 = mean(sex.2000), age.2000 = mean(age.2000), 
+#                        college.2000= mean(college.2000), income.2000 = mean(income.2000), 
+#                        authoritarianism = seq_range(authoritarianism, n = 2),
+#                        vote1 = c(0,1),
+#                        boomer = c(0,1),
+#                        gen_x  =c(0,1)) %>% 
+#                        mutate(authoritarianism_2 = authoritarianism*authoritarianism) %>%
+#                        add_linpred_draws(cohorts)  %>% 
+#                        mutate(Vote_Republican = plogis(.linpred))  %>%
+#                        mutate(Vote_Democrat   = 1 - plogis(.linpred))  %>%
+#                        mutate(Authoritarianism = recode(authoritarianism, `0` = "Non-Authoritarian", `1` = "Authoritarian")) %>%                      
+#                        mutate(Generation = ifelse(boomer == 1, "boomer", 
+#                                               ifelse(gen_x ==1, "GenX",
+#                                                  ifelse(gen_x ==0 & boomer ==0, "Silent/Greatest", 
+#                                                                                                   NA)))) %>%
+#                        mutate(Vote_Choice = ifelse(vote1 ==1, "Bush",
+#                                                 ifelse(vote1 ==0, "Gore", NA))) %>% 
+#                       filter(!is.na(Generation)) %>%
+#                     ggplot(aes(y = as.factor(Generation), 
+#                           x = Vote_Republican, 
+#                           fill = as.factor(Vote_Choice)))  +  facet_wrap(~Authoritarianism) + 
+#             geom_density_ridges2(alpha = 0.45, scale = 3, show.legend = FALSE , 
+#                                   quantile_lines = TRUE, quantiles = 0.5, rel_min_height = 0.01,
+#                                    quantiles = 0.5,  calc_ecdf = FALSE,
+#                                     jittered_points = TRUE, position = position_points_jitter(width = 0.05, height = 0),
+#                                      point_shape = 3, point_size = 1, point_color = "black", point_alpha = 0.01  ) 
                                      
                                      
                                      
-                                      + 
-              geom_density_ridges2(aes(y = as.factor(Vote_Choice), 
-                          x = Vote_Democrat, 
-                          fill = "blue"), alpha = 0.45, scale = 3, show.legend = FALSE , 
-                                  quantile_lines = TRUE, quantiles = 0.5, rel_min_height = 0.01,
-                                   quantiles = 0.5,  calc_ecdf = FALSE,
-                                    jittered_points = TRUE, position = position_points_jitter(width = 0.05, height = 0),
-                                     point_shape = 3, point_size = 1, point_color = "black", point_alpha = 0.01  ) + facet_wrap(~ Authoritarianism + Generation)
+#                                       + 
+#               geom_density_ridges2(aes(y = as.factor(Vote_Choice), 
+#                           x = Vote_Democrat, 
+#                           fill = "blue"), alpha = 0.45, scale = 3, show.legend = FALSE , 
+#                                   quantile_lines = TRUE, quantiles = 0.5, rel_min_height = 0.01,
+#                                    quantiles = 0.5,  calc_ecdf = FALSE,
+#                                     jittered_points = TRUE, position = position_points_jitter(width = 0.05, height = 0),
+#                                      point_shape = 3, point_size = 1, point_color = "black", point_alpha = 0.01  ) + facet_wrap(~ Authoritarianism + Generation)
                                      
                                      
                                      
                                      
                                      
-                                     +
-                                    facet_wrap(~as.factor(PID_T2)) +
-            scale_fill_manual(values =c("#0927d1ea", "#530086", "#c01111")) +
-            labs (title = "Simulating 2004 Partisanship", 
-                          subtitle = "With 2000 Partisanship and Authoritarianism\n") + 
-            scale_x_continuous("", limits=c(0,1))+
-            scale_y_discrete("") + 
-            ggtheme
-
-                       
-                       )
-                            
-                            
-
-
-
-
-
-
-                                                   ifelse(republican == 0 & independent ==1 & authoritarianism == 1, paste("Independent(2016),", "\nAuthoritarian"),
-                                                             ifelse(republican == 1 & independent ==0 & authoritarianism == 1, paste("Republican(2016),", "\nAuthoritarian"),
-                                                                  ifelse(republican == 0 & independent ==0 & authoritarianism == 0, paste("Democrat(2016),", "\nNon-Authoritarian"),
-                                                                      ifelse(republican == 0 & independent ==1 & authoritarianism == 0, paste("Independent(2016),", "\nNon-Authoritarian"),
-                                                                            ifelse(republican == 1 & independent ==0 & authoritarianism == 0, paste("Republican(2016),", "\nNon-Authoritarian"),
-                                                    "ILL"))))))) %>% filter(Partisanship != "ILL") %>%
-                   mutate(Partisanship2 = ifelse(republican == 0 & independent ==0, "Democrat(2020)", 
-                                                ifelse(republican ==1 & independent ==0, "Republican(2020)",
-                                                    "Independent(2016)"))) %>% 
-                  mutate(Partisanship =   factor(Partisanship, levels=c(paste("Democrat(2016),", "\nAuthoritarian"), 
-                                                                       paste("Democrat(2016),", "\nNon-Authoritarian"),
-                                                                        paste("Independent(2016),", "\nAuthoritarian"),
-                                                                        paste("Independent(2016),", "\nNon-Authoritarian"),
-                                                                        paste("Republican(2016),", "\nAuthoritarian"),
-                                                                        paste("Republican(2016),", "\nNon-Authoritarian")))) %>% 
-                    mutate(Partisanship = fct_rev(Partisanship)) %>%  
-                    mutate(PID_T2 = recode(.category, `1` = "Democrat(2020)", `2` = "Independent(2020)", `3` = "Republican(2020)") ) 
-                    
+#                                      +
+#                                     facet_wrap(~as.factor(PID_T2)) +
+#             scale_fill_manual(values =c("#0927d1ea", "#530086", "#c01111")) +
+#             labs (title = "Simulating 2004 Partisanship", 
+#                           subtitle = "With 2000 Partisanship and Authoritarianism\n") + 
+#             scale_x_continuous("", limits=c(0,1))+
+#             scale_y_discrete("") + 
+#            
                                       
 ### Voting, 2000
 fit1a = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
