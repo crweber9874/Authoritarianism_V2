@@ -15,7 +15,6 @@ library(tidybayes)
 #library(cowplot)
 source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/configurations.r")
 source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/user_functions.r")
-source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/analysis/chapter7/user_functions-ch8.r")
 data_location = "/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data/"
 setwd("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/Chapters/Chapters/Chapter7")
 # for all chapters
@@ -30,7 +29,7 @@ dat2000$authoritarianism_2  = dat2000$authoritarianism^2
 dat2012$authoritarianism_2  = dat2012$authoritarianism^2
 dat2016$authoritarianism_2  = dat2016$authoritarianism^2
 
-dat2000$republican          = ifelse(dat2000$pid3.1 ==3, 1, 0)
+dat2000$republican          = ifelse(dat2000$pid3.1 ==3, 1, 0) 
 dat2000$independent         = ifelse(dat2000$pid3.1 ==2, 1, 0)
 dat2000$democrat            = ifelse(dat2000$pid3.1 ==1, 1, 0)
 
@@ -244,7 +243,7 @@ fit2b = brm(pid3.2 ~ sex.2012 + sex.2012 + college.2012 +
               family = categorical(link = "logit"),
                data = dat2012, 
                chains = 3, 
-               cores = 8, 
+               cores = 5, 
                seed = 1234, 
                iter = 1000,
                control = list(adapt_delta = 0.9,
@@ -330,8 +329,8 @@ fit4c = brm(vote2 ~ female.2016 + age.2016 + college.2016 +
                control = list(adapt_delta = 0.9,
                               max_treedepth = 15))    
 
-dat = list(fit1a, fit1b,
-     fit2a, fit2b,
-     fit3a, fit3b,
-     fit4a, fit4b, fit4c)
-save(dat, file = "chapter7.rda")
+dat = list(fit1a, fit2a, fit3a, fit4a, fit4b, fit4c)   
+save(dat, file = "chapter7_voting.rda")
+
+dat = list(fit1b, fit2b, fit3b)
+save(dat, file = "chapter7_pid.rda")
