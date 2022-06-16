@@ -1170,7 +1170,7 @@ write.dta(data, file="pooled.ANES.dta")
 
 write.csv(data, file="pooled.ANES.csv")
 
-######
+###### Construct data for spatial analysis #######
 
 
 ## Other race

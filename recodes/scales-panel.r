@@ -9,7 +9,7 @@ library(dplyr)
 library(cowplot)
 source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/configurations.r")
 source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/configurations/user_functions.r")
-source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/analysis/chapter7/user_functions-ch8.r")
+#source("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/analysis/chapter7/user_functions-ch8.r")
 setwd("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_data")
 
 ##### Data Recodes #####
@@ -21,65 +21,41 @@ load("/Users/chrisweber/Desktop/Authoritarianism_V2/Authoritarianism_V2/clean_da
 
 
 ### Construct authoritarianism score in each panel########
+library(haven)
 head(panel_data_2000$auth1.2000)
-dat1 = subset(panel_data_2000, white.2000 ==1) %>% data.frame() %>% mutate(auth1 = recode(as.numeric(auth1.2000), `2` = 1, `3` = 2)) %>% 
-                mutate(auth2 = recode(as.numeric(auth2.2000), `2` = 1, `3` = 2)) %>% mutate(auth3 = recode(as.numeric(auth3.2000), `2` = 1, `3` = 2))  %>% 
+dat1 = subset(panel_data_2000, white.2000 ==1) %>% zap_labels() %>%
+                mutate(auth1 = recode(as.numeric(auth1.2000), `2` = 1, `3` = 2)) %>% 
+                mutate(auth2 = recode(as.numeric(auth2.2000), `2` = 1, `3` = 2)) %>% 
+                mutate(auth3 = recode(as.numeric(auth3.2000), `2` = 1, `3` = 2))  %>% 
                 mutate(auth4 = recode(as.numeric(auth4.2000), `2` = 1, `3` = 2)) %>% 
                 mutate(vote1  = vote.2000) %>% 
-                mutate(vote2  = vote.2004) 
+                mutate(vote2  = vote.2004) %>% 
+                mutate(authoritarianism = rowMeans(cbind(auth1, auth2, auth3, auth4)) %>% zero.one())
 dat1$pid3.1<-pid.r(dat1$pid.2000)
 dat1$pid3.2<-pid.r(dat1$pid.2004)
 
-dat2 = subset(panel_data_2012, white.2012 ==1) %>% data.frame() %>% mutate(auth1 = recode(as.numeric(auth1.2016), `0` = 1, `1` = 2)) %>% 
-                mutate(auth2 = recode(as.numeric(auth2.2016), `0` = 1, `1` = 2)) %>% mutate(auth3 = recode(as.numeric(auth3.2016), `0` = 1, `1` = 2))  %>% 
+dat2 = subset(panel_data_2012, white.2012 ==1) %>% zap_labels() %>%
+                mutate(auth1 = recode(as.numeric(auth1.2016), `0` = 1, `1` = 2)) %>% 
+                mutate(auth2 = recode(as.numeric(auth2.2016), `0` = 1, `1` = 2)) %>% 
+                mutate(auth3 = recode(as.numeric(auth3.2016), `0` = 1, `1` = 2))  %>% 
                 mutate(auth4 = recode(as.numeric(auth4.2016), `0` = 1, `1` = 2)) %>% 
+                mutate(authoritarianism = rowMeans(cbind(auth1, auth2, auth3, auth4)) %>% zero.one()) %>%
                 mutate(vote1  = vote.2012) %>% 
                 mutate(vote2  = vote.2016) 
 dat2$pid3.1<-pid.r(dat2$pid.2012a)
 dat2$pid3.2<-pid.r(dat2$pid.2016)
 
-dat3 = subset(panel_data_2016, white.2016 ==1)%>% mutate(auth1 = recode(as.numeric(auth.1.2016), `2` = 1, `3` = 2)) %>% 
-                mutate(auth2 = recode(as.numeric(auth.2.2016), `2` = 1, `3` = 2)) %>% mutate(auth3 = recode(as.numeric(auth.3.2016), `2` = 1, `3` = 2))  %>% 
+dat3 = subset(panel_data_2016, white.2016 ==1)%>% zap_labels() %>%
+                mutate(auth1 = recode(as.numeric(auth.1.2016), `2` = 1, `3` = 2)) %>% 
+                mutate(auth2 = recode(as.numeric(auth.2.2016), `2` = 1, `3` = 2)) %>% 
+                mutate(auth3 = recode(as.numeric(auth.3.2016), `2` = 1, `3` = 2))  %>% 
                 mutate(auth4 = recode(as.numeric(auth.4.2016), `2` = 1, `3` = 2)) %>% 
+                mutate(authoritarianism = rowMeans(cbind(auth1, auth2, auth3, auth4)) %>%zero.one()) %>%
                 mutate(vote1  = vote.2016) %>% 
                 mutate(vote2  = vote.2020) 
 dat3$pid3.1<-pid.r(dat3$pid.2016)
 dat3$pid3.2<-pid.r(dat3$pid.2020)
 
-FORMULA         =  "latent =~  auth1 + auth2 + auth3 + auth4"
-
-##### Create a latent authoritarianism score #####
-latent_authoritarianism = function(data = dat1,
-                                   auth = c("id", "auth1", "auth2", "auth3", "auth4"), 
-                                  formula = FORMULA){
-                data$id       <-  c(1:dim(data)[1])
-                DATA          <-  na.omit(data[,  auth])
-                DATA$short_id <-  c(1:dim(DATA)[1])
-                model = lavaan::cfa(formula,  data=DATA)  
-                predictions = data.frame(lavPredict(model, append.data = TRUE,  assemble = FALSE))
-                predictions$short_id<-c(1:dim(DATA)[1])
-                temp =  merge(DATA, predictions, "short_id", all.x = T)
-                data = merge(data, temp, by = "id", all.x = TRUE)
-return(data)
-}
-
-#### Construct the dataset, with latent variable ###
-dat1 = latent_authoritarianism(data = dat1) %>% select(c("latent", "auth1", "auth2", "auth3", "auth4",
-                            "college.2000", "age.2000", "sex.2000", "income.2000",
-                            "pid3.1", "pid3.2", "vote1", "vote2"))  %>% na.omit()
-dat1$authoritarianism = zero.one(dat1$latent)
-
-dat2 = latent_authoritarianism(data = dat2) %>% select(c("latent.x", "auth1", "auth2", "auth3", "auth4",
-                            "college.2012", "age.2012", "sex.2012", "income.2012",
-                            "pid3.1", "pid3.2", "vote1", "vote2")) %>% na.omit()
-dat2$authoritarianism = zero.one(dat2$latent.x)
-
-
-dat3 = latent_authoritarianism(data = dat3) %>% select(c("latent.x", "auth1", "auth2", "auth3", "auth4",
-                            "college.2016", "age.2016", "female.2016", "income.2016",
-                            "pid3.1", "pid3.2", "vote1", "vote2")) %>% na.omit()
-dat3$authoritarianism = zero.one(dat3$latent.x)
-#########################################################
 dat1 = dat1 %>% mutate(id = seq(1:nrow(dat1)))
 dat2 = dat2 %>% mutate(id = seq(1:nrow(dat2)))
 dat3 = dat3 %>% mutate(id = seq(1:nrow(dat3)))

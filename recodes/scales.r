@@ -27,23 +27,7 @@ data$racial.resentment<-zero.one(rowMeans(cbind(data$rr1, data$rr2, data$rr3, da
 
 
 ##### Create a latent authoritarianism score #####
-data$id       <-  c(1:dim(data)[1])
-DATA          <-  na.omit(data[,c("id", "auth.1", "auth.2", "auth.3", "auth.4")])
-DATA$short_id <-  c(1:dim(DATA)[1])
-FORMULA         =  "latent =~  auth.1 + auth.2 + auth.3 + auth.4"
-ORDERED         = c("auth.1", "auth.2", "auth.3", "auth.4")
-model = lavaan::cfa(FORMULA, ordered=ORDERED, data=DATA)  
-predictions = data.frame(lavPredict(model, append.data = TRUE,  assemble = FALSE))
-predictions$short_id<-c(1:dim(DATA)[1])
-temp =  merge(DATA, predictions, "short_id", all.x = T)
-data = merge(data, temp, by = "id", all.x = TRUE)
-psych::alpha(cbind(data$auth.1, data$auth.2, data$auth.3, data$auth.4))    #0.68
-data$authoritarianism_sum <- zero.one(rowMeans(cbind(data$auth.1, data$auth.2, data$auth.3, data$auth.4), na.rm=T))
-data$authoritarianism <- zero.one(data$latent)
-cor.test(data$latent, data$authoritarianism_sum) # 
-#### Estimate a latent variable model #### 
-#### Just vanilla one factor model ####
-#### with varying slopes (i don't know about this)
+data$authoritarianism <- zero.one(rowMeans(cbind(data$auth.1, data$auth.2, data$auth.3, data$auth.4), na.rm=T))
 
 
 data$split.ticket<-recode(as.character(data$split.house), "'DP-DC'=0; 'DP-RC'=1; 'RP-DC'=1; 'RP-RC'=0; else=NA")

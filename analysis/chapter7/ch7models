@@ -67,72 +67,6 @@ dat2016 = dat2016 %>%
 library(brms)
 
 
-# cohorts = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
-#                     income.2000 + authoritarianism + authoritarianism_2 + 
-#                     boomer + gen_x   + 
-#                     vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 + 
-#                     vote1:boomer + vote1:boomer + 
-#                      authoritarianism:boomer + authoritarianism_2:boomer + 
-#                      authoritarianism:gen_x + authoritarianism_2:gen_x,
-#               family = bernoulli(link = "logit"),
-#                data = dat2000, 
-#                chains = 3, 
-#                cores = 4, 
-#                seed = 1234, 
-#                iter = 2000,
-#                control = list(adapt_delta = 0.9,
-#                               max_treedepth = 15))    
-# ### PID, 2000
-
-# cohorts2 = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
-#                     income.2000 + authoritarianism + authoritarianism_2 + 
-#                     boomer + gen_x   + 
-#                     vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 + 
-#                     vote1:boomer + vote1:boomer + 
-#                      authoritarianism:boomer + authoritarianism_2:boomer + 
-#                      authoritarianism:gen_x + authoritarianism_2:gen_x,
-#               family = bernoulli(link = "logit"),
-#                data = dat2000, 
-#                chains = 3, 
-#                cores = 4, 
-#                seed = 1234, 
-#                iter = 2000,
-#                control = list(adapt_delta = 0.9,
-#                               max_treedepth = 15))    
-# ### PID, 2000
-
-# cohort_2000_pid = brm(pid3.2 ~ sex.2000 + age.2000 + college.2000 + 
-#              income.2000 + authoritarianism + authoritarianism_2 + 
-#              republican  + independent + 
-#              boomer + gen_x   + 
-#              ##
-#              authoritarianism:boomer + authoritarianism_2:boomer + 
-#              authoritarianism:gen_x + authoritarianism_2:gen_x  + 
-#              ##
-#              authoritarianism:republican  + 
-#              authoritarianism_2:republican + 
-#              authoritarianism:independent  + 
-#              authoritarianism_2:independent  +
-#              ###
-#              republican:boomer + independent:boomer + 
-#              republican:gen_x + independent:gen_x + 
-#              ###
-#              republican:boomer:authoritarianism + independent:boomer:authoritarianism+
-#              republican:gen_x:authoritarianism + republican:gen_x:authoritarianism +
-
-#              republican:boomer:authoritarianism_2 + independent:boomer:authoritarianism_2+
-#              republican:gen_x:authoritarianism_2 + republican:gen_x:authoritarianism_2,
-#               family = categorical(link = "logit"),
-#                data = dat2000, 
-#                chains = 3, 
-#                cores = 8, 
-#                seed = 1234, 
-#                iter = 2000,
-#                control = list(adapt_delta = 0.9,
-#                               max_treedepth = 15)
-#                )   
-
-
 # dat2000 %>% data_grid(sex.2000 = mean(sex.2000), age.2000 = mean(age.2000), 
 #                        college.2000= mean(college.2000), income.2000 = mean(income.2000), 
 #                        authoritarianism = seq_range(authoritarianism, n = 2),
@@ -334,3 +268,208 @@ save(dat, file = "chapter7_voting.rda")
 
 dat = list(fit1b, fit2b, fit3b)
 save(dat, file = "chapter7_pid.rda")
+
+
+
+
+
+### Education Analysis
+
+fit4a = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
+             income.2000 + authoritarianism + authoritarianism_2 + 
+             vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 +
+             authoritarianism:college.2000 + authoritarianism_2:college.2000 +
+             college.2000:vote1 + authoritarianism:college.2000:vote1,
+              family = bernoulli(link = "logit"),
+               data = dat2000, 
+               chains = 3, 
+               cores = 4, 
+               seed = 1234, 
+               iter = 1000,
+               control = list(adapt_delta = 0.9,
+                              max_treedepth = 15))    
+
+fit4b = brm(vote2 ~ sex.2012 + age.2012 + college.2012 + 
+             income.2012 + authoritarianism + authoritarianism_2 + 
+             vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 +
+             authoritarianism:college.2012 + authoritarianism_2:college.2012 +
+             college.2012:vote1 + authoritarianism:college.2012:vote1,
+              family = bernoulli(link = "logit"),
+               data = dat2012, 
+               chains = 3, 
+               cores = 4, 
+               seed = 1234, 
+               iter = 1000,
+               control = list(adapt_delta = 0.9,
+                              max_treedepth = 15))    
+
+
+fit4c = brm(vote2 ~ female.2016 + age.2016 + college.2016 + 
+             income.2016 + authoritarianism + authoritarianism_2 + 
+             vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 +
+             authoritarianism:college.2016 + authoritarianism_2:college.2016 +
+             college.2016:vote1 + authoritarianism:college.2016:vote1,
+              family = bernoulli(link = "logit"),
+               data = dat2016, 
+               chains = 3, 
+               cores = 4, 
+               seed = 1234, 
+               iter = 1000,
+               control = list(adapt_delta = 0.9,
+                              max_treedepth = 15))    
+
+
+
+cohorts1 = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
+                    income.2000 + authoritarianism + authoritarianism_2 + 
+                    boomer + gen_x   + 
+                    vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 + 
+                    vote1:boomer + vote1:boomer + 
+                     authoritarianism:boomer + authoritarianism_2:boomer + 
+                     authoritarianism:gen_x + authoritarianism_2:gen_x,
+              family = bernoulli(link = "logit"),
+               data = dat2000, 
+               chains = 3, 
+               cores = 4, 
+               seed = 1234, 
+               iter = 2000,
+               control = list(adapt_delta = 0.9,
+                              max_treedepth = 15))    
+
+cohorts2 = brm(vote2 ~ sex.2012 + age.2012 + college.2012 + 
+                    income.2012 + authoritarianism + authoritarianism_2 + 
+                    boomer + gen_x   + 
+                    vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 + 
+                    vote1:boomer + vote1:boomer + vote1:gen_x + vote1:millenial +  
+                     authoritarianism:boomer + authoritarianism_2:boomer + 
+                     authoritarianism:gen_x + authoritarianism_2:gen_x +
+                     authoritarianism:millenial + authoritarianism_2:millenial,
+              family = bernoulli(link = "logit"),
+               data = dat2012, 
+               chains = 3, 
+               cores = 4, 
+               seed = 1234, 
+               iter = 2000,
+               control = list(adapt_delta = 0.9,
+                              max_treedepth = 15))
+
+cohorts3 = brm(vote2 ~ female.2016 + age.2016 + college.2016 + 
+                    income.2016 + authoritarianism + authoritarianism_2 + 
+                    boomer + gen_x   + 
+                    vote1 + authoritarianism:vote1 + authoritarianism_2:vote1 + 
+                    vote1:boomer + vote1:boomer + 
+                    vote1:gen_x +
+                     authoritarianism:boomer + authoritarianism_2:boomer + 
+                     authoritarianism:gen_x + authoritarianism_2:gen_x +
+                     authoritarianism:millenial + authoritarianism_2:millenial,
+              family = bernoulli(link = "logit"),
+               data = dat2016, 
+               chains = 3, 
+               cores = 4, 
+               seed = 1234, 
+               iter = 2000,
+               control = list(adapt_delta = 0.9,
+                              max_treedepth = 15)) 
+### Lots of terms.
+cohorts_e1 = brm(vote2 ~ sex.2000 + age.2000 + college.2000 + 
+                    income.2000 + authoritarianism + authoritarianism_2 + 
+                    boomer + gen_x   + 
+                    vote1 + 
+                    authoritarianism:vote1 + 
+                    authoritarianism_2:vote1 + 
+                    authoritarianism:college.2000 + 
+                    authoritarianism_2:college.2000 +
+                    vote1:college.2000 + 
+                    vote1:boomer + 
+                    vote1:boomer + 
+                    authoritarianism:boomer + 
+                    authoritarianism_2:boomer + 
+                    college.2000:boomer + 
+                    college.2000:gen_x +
+                    college.2000:authoritarianism:boomer + 
+                    college.2000:authoritarianism_2:boomer + 
+                    college.2000:authoritarianism:gen_x + 
+                    college.2000:authoritarianism_2:gen_x,
+               family = bernoulli(link = "logit"),
+               data = dat2000, 
+               chains = 3, 
+               cores = 4, 
+               seed = 1234, 
+               iter = 2000,
+               control = list(adapt_delta = 0.9,
+                              max_treedepth = 15))  
+
+
+cohorts_e2 = brm(vote2 ~ sex.2012 + age.2012 + college.2012 + 
+                    income.2012 + authoritarianism + authoritarianism_2 + 
+                    boomer + gen_x   + millenial + 
+                    vote1 + 
+                    authoritarianism:vote1 + 
+                    authoritarianism_2:vote1 + 
+                    authoritarianism:college.2012 + 
+                    authoritarianism_2:college.2012 +
+                    authoritarianism:boomer + 
+                    authoritarianism_2:boomer + 
+                    authoritarianism:millenial + 
+                    authoritarianism_2:millenial + 
+                    vote1:millenial + 
+                    vote1:college.2012 + 
+                    college.2012:millenial + 
+                    vote1:boomer + 
+                    vote1:boomer + 
+                    college.2012:boomer + 
+                    college.2012:gen_x +
+                    college.2012:authoritarianism:boomer + 
+                    college.2012:authoritarianism_2:boomer + 
+                    college.2012:authoritarianism:gen_x + 
+                    college.2012:authoritarianism_2:gen_x + 
+                    college.2012:authoritarianism:millenial + 
+                    college.2012:authoritarianism_2:millenial,
+               family = bernoulli(link = "logit"),
+               data = dat2012, 
+               chains = 3, 
+               cores = 4, 
+               seed = 1234, 
+               iter = 2000,
+               control = list(adapt_delta = 0.9,
+                              max_treedepth = 15))  
+
+
+cohorts_e3 = brm(vote2 ~ female.2016 + age.2016 + college.2016 + 
+                    income.2016 + authoritarianism + authoritarianism_2 + 
+                    boomer + gen_x   + millenial + 
+                    vote1 + 
+                    authoritarianism:vote1 + 
+                    authoritarianism_2:vote1 + 
+                    authoritarianism:college.2016 + 
+                    authoritarianism_2:college.2016 +
+                    authoritarianism:boomer + 
+                    authoritarianism_2:boomer + 
+                    authoritarianism:millenial + 
+                    authoritarianism_2:millenial + 
+                    vote1:millenial + 
+                    vote1:college.2016 + 
+                    college.2016:millenial + 
+                    vote1:boomer + 
+                    vote1:boomer + 
+                    college.2016:boomer + 
+                    college.2016:gen_x +
+                    college.2016:authoritarianism:boomer + 
+                    college.2016:authoritarianism_2:boomer + 
+                    college.2016:authoritarianism:gen_x + 
+                    college.2016:authoritarianism_2:gen_x + 
+                    college.2016:authoritarianism:millenial + 
+                    college.2016:authoritarianism_2:millenial,
+               family = bernoulli(link = "logit"),
+               data = dat2016, 
+               chains = 3, 
+               cores = 4, 
+               seed = 1234, 
+               iter = 2000,
+               control = list(adapt_delta = 0.9,
+                              max_treedepth = 15))  
+
+dat = list(cohorts1, cohorts2, cohorts3, cohorts_e1, 
+            cohorts_e2, cohorts_e3)
+save(dat, file = "chapter7_cohorts.rda")
+
