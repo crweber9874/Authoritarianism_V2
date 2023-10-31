@@ -35,5 +35,5 @@
 *.rda
 *.csv
 
-"clean_data/*"
+clean_data/*
 
