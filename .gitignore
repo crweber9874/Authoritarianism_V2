@@ -35,5 +35,9 @@
 *.rda
 *.csv
 
-clean_data/*
+# Ignore all .rda files
+*.rda
+#ignore the clean data folder
+clean_data
+
 
