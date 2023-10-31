@@ -38,7 +38,4 @@
 # Ignore all .rda files
 *.rda
 #ignore the clean data folder
-clean_data
-
-
-/Users/Chris/AuthoritarianismBookProject_FedericoFeldmanWeber/AuthoritarianismBookProject_FedericoFeldmanWeber.code-workspace
+clean_data/*
