@@ -66,7 +66,6 @@ cores = 8,
 seed = 1234,
 iter = 1000
 )
-diff.Date()
 
 
 # For the Appendix
@@ -143,7 +142,7 @@ iter = 1000
 
 set.seed(32)
 spatial_dat <- filteredData %>%
-  select(vote, differenceD, differenceR, authoritarianism, authoritarianism2, female, age, college, income, jewish, catholic, other, year) %>%
+  select(vote, differenceD, differenceR, authoritarianism, authoritarianism2, year) %>%
   na.omit() %>%
   mutate(diffCR = differenceR * differenceR) %>%
   mutate(diffCD = differenceD * differenceD) %>%
@@ -152,20 +151,27 @@ spatial_dat <- filteredData %>%
 # Contour Figures
 spatialModel <- brm(vote ~ authoritarianism + authoritarianism2 + diffOfdiff +
   authoritarianism * diffOfdiff + authoritarianism2 * diffOfdiff +
-  female + age + college + income + jewish + catholic + other +
-  (1 + authoritarianism + authoritarianism2 + diffOfdiff +
-    authoritarianism * diffOfdiff + authoritarianism2 * diffOfdiff | year),
+  ((1 + diffOfdiff + authoritarianism + authoritarianism2 + diffOfdiff * authoritarianism + authoritarianism2 * diffOfdiff) | year),
 family = bernoulli(link = "probit"),
 data = spatial_dat,
 chains = 3,
 cores = 8,
 seed = 1234,
 iter = 2000,
-control = list(adapt_delta = 0.9)
+control = list(adapt_delta = 0.95)
 )
 
+
+set.seed(32)
+spatial_dat <- filteredData %>%
+  select(vote, differenceD, differenceR, authoritarianism, authoritarianism2, college, year) %>%
+  na.omit() %>%
+  mutate(diffCR = differenceR * differenceR) %>%
+  mutate(diffCD = differenceD * differenceD) %>%
+  mutate(diffOfdiff = diffCD - diffCR)
+
+
 modelFitcollege <- brm(vote ~ authoritarianism + authoritarianism2 + college +
-  female + age + income + jewish + catholic + other +
   college * authoritarianism + college * authoritarianism2 + diffCR + diffCD +
   diffCD * authoritarianism + diffCR * authoritarianism +
   diffCD * authoritarianism2 + diffCR * authoritarianism2 +
@@ -219,6 +225,24 @@ seed = 1234,
 iter = 1000
 )
 
+spatial_dat <- filteredData %>%
+  select(vote, differenceD, differenceR, authoritarianism, authoritarianism2, year) %>%
+  na.omit() %>%
+  mutate(diffCR = differenceR * differenceR) %>%
+  mutate(diffCD = differenceD * differenceD) %>%
+  mutate(diffOfdiff = diffCD - diffCR)
+
+
+
+
+spatial_dat <- filteredData %>%
+  select(vote, differenceD, differenceR, authoritarianism, authoritarianism2, college, year) %>%
+  na.omit() %>%
+  mutate(diffCR = differenceR * differenceR) %>%
+  mutate(diffCD = differenceD * differenceD) %>%
+  mutate(diffOfdiff = diffCD - diffCR)
+
+
 ch9models <- list(
   filteredData = filteredData,
   polarization = polarization,
@@ -230,10 +254,7 @@ ch9models <- list(
   spatialModel = spatialModel,
   modelFitcollege = modelFitcollege,
   polarizationMod = polarizationMod,
-  modelEducPolarization = modelEducPolarization
+  modelEducPolarization = modelEducPolarization,
+  spatialDat = spatial_dat
 )
-save(ch9models, file = "/Users/Chris/Dropbox/github_repos/Authoritarianism_V2/authoritarianism_replication_docker/Chapter Analysis/Chapter9/ch9models.rda")
-
-my_list <- list(model = spatialModel, data = spatial_dat)
-
-save(my_list, file = "/Users/Chris/Dropbox/github_repos/Authoritarianism_V2/authoritarianism_replication_docker/Chapter Analysis/Chapter9/spatialModel.rda")
+save(ch9models, file = "/Users/Chris/AuthoritarianismBookProject_FedericoFeldmanWeber/Chapter Analysis/Chapter 9 Analysis/ch9models.rda")
